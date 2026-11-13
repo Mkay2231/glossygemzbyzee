@@ -5,7 +5,7 @@
 <meta name="description" content="Explore earrings, necklaces, bracelets and rings from GlossyGemzByZee.">
 <title>GlossyGemzByZee | Jewelry</title>
 <link rel="stylesheet" href="style.css">
-<script defer src="shop.js"></script>
+<script defer src="/storefront-gifts.js"></script>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -41,10 +41,10 @@
 <section class="gift wrap" id="gifts" aria-labelledby="gift-title">
 <div class="gift-intro"><p class="eyebrow">GIFT BUILDER</p><h2 id="gift-title">Put a gift together.</h2><p>Choose the jewelry you’d like to give and add a personal note.</p></div>
 <form id="gift-form">
-<fieldset><legend>Choose your pieces</legend><div id="gift-options"></div></fieldset>
+<fieldset><legend>Choose your pieces</legend><div id="gift-options"><p>Loading jewelry…</p></div></fieldset>
 <label for="gift-note">Gift note <span class="sample">(optional)</span></label>
 <textarea id="gift-note" maxlength="200" rows="3" placeholder="Write a short message"></textarea>
-<div class="gift-summary"><strong id="gift-total" aria-live="polite"></strong><button class="primary" type="submit">Add gift to bag</button></div>
+<div class="gift-summary"><strong id="gift-total" aria-live="polite"></strong><button class="primary" type="submit" disabled>Add gift to bag</button></div>
 </form>
 </section>
 <section class="edit" id="edit"><div class="edit-layout wrap">
