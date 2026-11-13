@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manage products | GlossyGemzByZee</title>
+<link rel="stylesheet" href="/style.css"><script defer src="/admin.js"></script>
+<style>
+.admin{max-width:850px;padding-block:32px}.admin section{margin-block:24px;padding:20px;border:1px solid var(--border);border-radius:8px}
+.admin h2{font-size:38px;margin-bottom:12px}.admin label{display:block}.admin input:not([type=checkbox]),.admin select{width:100%;min-height:42px;padding:6px;border:1px solid var(--border);background:white}
+.admin button{padding:8px 14px;background:var(--cream);border:1px solid var(--border);border-radius:6px}.admin button:disabled{opacity:.5}.admin button[value=publish]{background:var(--gold);color:white}
+.admin .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-block:12px}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px;margin-block:12px}.photos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:5px}.photos button{width:100%;margin-top:4px}
+.actions,.listing{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.listing{justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)}
+#message{position:sticky;top:0;z-index:1;background:var(--cream);padding:8px 12px}#message:empty{display:none}
+</style>
+<header class="wrap topbar"><a class="wordmark" href="/">GlossyGemz<span>ByZee</span></a><a href="/">View storefront ↗</a></header>
+<main class="admin wrap">
+<h1>Manage products</h1>
+<p id="message" role="status"></p>
+<section><h2>Listings</h2><button id="new" type="button">Add product</button><div id="list"></div></section>
+<section><h2>Bulk photo upload</h2><p>Select photos from your device, then check the photos for one item and create a draft. Repeat for each item.</p>
+<label>Choose photos <input id="bulk" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+<div id="pool" class="photos"></div><button id="group" type="button">Create draft from selected photos</button></section>
+<section id="editor" hidden><h2 id="editor-title">Add product</h2>
+<form id="product">
+<div class="fields"><label>Product name <input name="title" maxlength="120"></label>
+<label>Category <select name="type"><option>Earrings</option><option>Necklaces</option><option>Bracelets</option><option>Rings</option></select></label>
+<label>Price in naira <input name="price" type="number" min="0" max="999999999" step="1"></label>
+<label>Stock quantity <input name="stock" type="number" min="0" max="999999" step="1"></label></div>
+<label>Add photos <input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+<div id="gallery" class="photos"></div>
+<div class="actions"><button name="action" value="draft">Save as draft</button><button name="action" value="publish">Publish</button></div>
+</form></section>
+</main>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Explore earrings, necklaces, bracelets and rings from GlossyGemzByZee.">
+<title>GlossyGemzByZee | Jewelry</title>
+<link rel="stylesheet" href="style.css">
+<script defer src="shop.js"></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site-header">
+<div class="topbar wrap">
+<a class="wordmark" href="./">GlossyGemz<span>ByZee</span></a>
+<form class="search" role="search" action="#collection">
+<label class="sr-only" for="search">Search jewelry</label>
+<input id="search" type="search" placeholder="Search jewelry">
+<button type="submit">Search</button>
+</form>
+<button id="open-bag" class="bag" type="button">Bag <span id="bag-count">0</span></button>
+</div>
+<nav class="nav" aria-label="Main navigation"><div class="wrap"><a href="#categories">Shop by category</a><a href="#collection">All jewelry</a><a href="#edit">The Gold Edit</a></div></nav>
+</header>
+<main id="main">
+<section class="hero">
+<div class="hero-layout wrap">
+<div class="hero-copy"><p class="eyebrow">THE GOLD EDIT</p><h1>Jewelry worth<br><em>dressing up for.</em></h1><p>From sculptural hoops to delicate layers, find the pieces you’ll reach for again and again.</p><a class="primary" href="#collection">Shop all jewelry <span aria-hidden="true">↗</span></a></div>
+<div class="hero-visuals"><img src="hero.jpg" class="hero-photo" alt="Model wearing gold hoops and layered necklaces"><div class="hero-detail photo-2" role="img" aria-label="Gold necklace with a pearl drop"></div></div>
+</div>
+</section>
+<section class="categories wrap" id="categories" aria-labelledby="categories-title">
+<div class="section-head"><h2 id="categories-title">Shop by category</h2></div>
+<div id="category-tiles" class="category-tiles"></div>
+</section>
+<section class="collection wrap" id="collection" aria-labelledby="collection-title">
+<div class="section-head"><h2 id="collection-title">Explore the collection</h2><p class="sample" id="catalog-note">Sample products and prices</p></div>
+<div class="filters" id="filters" aria-label="Filter by jewelry type"></div>
+<p class="sr-only" id="results" role="status"></p>
+<div class="products" id="products"></div>
+</section>
+<section class="edit" id="edit"><div class="edit-layout wrap">
+<div class="edit-photo photo-3" role="img" aria-label="Sculptural gold cuff resting on stone"></div>
+<div class="edit-copy"><p class="eyebrow">THE GOLD EDIT</p><h2>Make it yours.</h2><p>Start with one piece you love, then layer on the rest.</p><a class="primary" href="#collection" data-category="Bracelets">Explore bracelets <span aria-hidden="true">↗</span></a></div>
+</div></section>
+</main>
+<footer class="wrap"><a class="wordmark" href="./">GlossyGemz<span>ByZee</span></a><a href="#categories">Shop by category ↑</a></footer>
+<dialog id="bag-dialog" aria-labelledby="bag-title">
+<div class="drawer-head"><h2 id="bag-title">Your bag</h2><button id="close-bag" aria-label="Close bag" type="button">×</button></div>
+<div id="bag-items"></div><div id="bag-total"></div><p class="sample">Checkout is unavailable in this preview.</p>
+</dialog>
+<div class="status" role="status" id="status"></div>
+</body>
+</html>
