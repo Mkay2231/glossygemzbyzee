@@ -2,7 +2,7 @@ const headers = {'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const json = (data, status=200) => Response.json(data,{status,headers});
 const error = (message,status=400) => json({error:message},status);
 const uuid = /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/;
-const types = ['Earrings','Necklaces','Bracelets','Rings'];
+const types = ['Earrings','Necklaces','Bracelets','Rings','Combos'];
 const mime = {'css':'text/css','js':'text/javascript','jpg':'image/jpeg'};
 const photoTypes = ['image/jpeg','image/png','image/webp'];
 

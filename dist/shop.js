@@ -3,7 +3,9 @@ let catalog = [
   { id: 2, name: 'Pearl Drop Necklace', type: 'Necklaces', price: 18000 },
   { id: 3, name: 'Dune Cuff', type: 'Bracelets', price: 16500 },
   { id: 4, name: 'Lumi Dome Ring', type: 'Rings', price: 12500 },
-  { id: 5, name: 'Fine Line Bracelet', type: 'Bracelets', price: 11500 }
+  { id: 5, name: 'Fine Line Bracelet', type: 'Bracelets', price: 11500 },
+  { id: 6, name: 'Chain, Cuff & Ring Set', type: 'Combos', price: 47000, members: [2, 3, 4] },
+  { id: 7, name: 'Hoops & Fine Bracelet Set', type: 'Combos', price: 26000, members: [1, 5] }
 ];
 
 const filters = document.querySelector('#filters');
@@ -12,11 +14,12 @@ const search = document.querySelector('#search');
 const searchForm = search.form;
 const results = document.querySelector('#results');
 const allJewelry = 'All jewelry';
-const categorySamples = catalog.filter((item, index) =>
+const categorySamples = catalog.filter(item => item.type !== 'Combos').filter((item, index) =>
   catalog.findIndex(product => product.type === item.type) === index
 );
 let category = allJewelry;
 const products = document.querySelector('#products');
+const combos = document.querySelector('#combo-products');
 const dialog = document.querySelector('#bag-dialog');
 const items = document.querySelector('#bag-items');
 const total = document.querySelector('#bag-total');
@@ -62,12 +65,19 @@ function renderProducts() {
   const terms = search.value.toLowerCase().trim().split(/\s+/);
   const shown = catalog.filter(item => {
     const searchable = `${item.name} ${item.type}`.toLowerCase();
-    return (category === allJewelry || item.type === category) &&
+    return item.type !== 'Combos' && (category === allJewelry || item.type === category) &&
       terms.every(term => searchable.includes(term));
   });
-  products.innerHTML = shown.map(({ id, name, price, type, stock, photos }) => `
+  products.innerHTML = productCards(shown) || '<p class="empty">No jewelry matches your search.</p>';
+  combos.innerHTML = productCards(catalog.filter(item => item.type === 'Combos')) || '<p>No jewelry combos are available yet.</p>';
+  results.textContent = shown.length + ' products shown.';
+  for (const button of filters.children) button.setAttribute('aria-pressed', String(button.textContent === category));
+}
+
+function productCards(list) {
+  return list.map(({ id, name, price, type, stock, photos, members }) => `
     <article class="product">
-      <div class="product-photo ${photos ? 'uploaded-photo' : 'photo-' + id}" ${photos ? '' : 'role="img" aria-label="' + escape(name) + '"'}>${photos ? '<img loading="lazy" src="/media/' + photos[0] + '" alt="' + escape(name) + '">' : ''}</div>
+      ${members ? '<div class="combo-photos">' + members.map(id => '<div class="product-photo photo-' + id + '"></div>').join('') + '</div>' : `<div class="product-photo ${photos ? 'uploaded-photo' : 'photo-' + id}" ${photos ? '' : 'role="img" aria-label="' + escape(name) + '"'}>${photos ? '<img loading="lazy" src="/media/' + photos[0] + '" alt="' + escape(name) + '">' : ''}</div>`}
       ${photos?.length > 1 ? '<details class="extra-photos"><summary>More photos</summary>' + photos.slice(1).map(photo => '<a href="/media/' + photo + '" target="_blank" rel="noopener"><img loading="lazy" src="/media/' + photo + '" alt="More views of ' + escape(name) + '"></a>').join('') + '</details>' : ''}
       <div class="product-info">
         <p class="product-type">${type}</p>
@@ -77,11 +87,8 @@ function renderProducts() {
           <button type="button" data-add="${id}" ${stock === 0 ? 'disabled' : ''} aria-label="Add ${escape(name)} to bag">${stock === 0 ? 'Sold out' : 'Add to bag'}</button>
         </div>
       </div>
-    </article>`).join('') || '<p class="empty">No jewelry matches your search.</p>';
-  results.textContent = `${shown.length} ${shown.length === 1 ? 'product' : 'products'} shown.`;
-  for (const button of filters.children) {
-    button.setAttribute('aria-pressed', String(button.textContent === category));
-  }
+    </article>`).join('');
+
 }
 
 function productFor(id) {
@@ -108,7 +115,7 @@ function updateGiftTotal() {
 
 function renderGiftOptions() {
   const checked = new Set(selectedGiftProducts().map(item => String(item.id)));
-  giftOptions.innerHTML = catalog.filter(({ stock }) => stock !== 0).map(({ id, name, price }) => {
+  giftOptions.innerHTML = catalog.filter(({ stock, type }) => stock !== 0 && type !== 'Combos').map(({ id, name, price }) => {
     const canAdd = available(id) > (bag[id] || 0);
     return `<label class="gift-option"><input type="checkbox" value="${id}" ${canAdd && checked.has(String(id)) ? 'checked' : ''} ${canAdd ? '' : 'disabled'}><span>${escape(name)}<small>${canAdd ? '' : 'Already at available quantity'}</small></span><span>${money(price)}</span></label>`;
   }).join('') || '<p>No pieces are available for gifting right now.</p>';
@@ -205,7 +212,7 @@ searchForm.addEventListener('submit', event => {
   renderProducts();
   window.location.hash = 'collection';
 });
-products.addEventListener('click', event => {
+document.querySelector('main').addEventListener('click', event => {
   const id = event.target.dataset.add;
   if (!id) return;
   const product = catalog.find(item => String(item.id) === id);
