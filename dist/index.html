@@ -19,7 +19,7 @@
 </form>
 <button id="open-bag" class="bag" type="button">Bag <span id="bag-count">0</span></button>
 </div>
-<nav class="nav" aria-label="Main navigation"><div class="wrap"><a href="#categories">Shop by category</a><a href="#collection">All jewelry</a><a href="#edit">The Gold Edit</a></div></nav>
+<nav class="nav" aria-label="Main navigation"><div class="wrap"><a href="#categories">Shop by category</a><a href="#collection">All jewelry</a><a href="#gifts">Gift Builder</a><a href="#edit">The Gold Edit</a></div></nav>
 </header>
 <main id="main">
 <section class="hero">
@@ -37,6 +37,15 @@
 <div class="filters" id="filters" aria-label="Filter by jewelry type"></div>
 <p class="sr-only" id="results" role="status"></p>
 <div class="products" id="products"></div>
+</section>
+<section class="gift wrap" id="gifts" aria-labelledby="gift-title">
+<div class="gift-intro"><p class="eyebrow">GIFT BUILDER</p><h2 id="gift-title">Put a gift together.</h2><p>Choose the jewelry you’d like to give and add a personal note.</p></div>
+<form id="gift-form">
+<fieldset><legend>Choose your pieces</legend><div id="gift-options"></div></fieldset>
+<label for="gift-note">Gift note <span class="sample">(optional)</span></label>
+<textarea id="gift-note" maxlength="200" rows="3" placeholder="Write a short message"></textarea>
+<div class="gift-summary"><strong id="gift-total" aria-live="polite"></strong><button class="primary" type="submit">Add gift to bag</button></div>
+</form>
 </section>
 <section class="edit" id="edit"><div class="edit-layout wrap">
 <div class="edit-photo photo-3" role="img" aria-label="Sculptural gold cuff resting on stone"></div>

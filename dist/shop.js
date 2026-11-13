@@ -30,7 +30,22 @@ const money = amount => new Intl.NumberFormat('en-NG', {
   style: 'currency', currency: 'NGN', maximumFractionDigits: 0
 }).format(amount);
 
-const bag = {};
+const bag = Object.create(null);
+const giftKey = 'glossygemz-gifts';
+const giftForm = document.querySelector('#gift-form');
+const giftOptions = document.querySelector('#gift-options');
+const giftNote = document.querySelector('#gift-note');
+const giftTotal = document.querySelector('#gift-total');
+let gifts = [];
+try {
+  const saved = JSON.parse(localStorage.getItem(giftKey));
+  if (Array.isArray(saved)) gifts = saved.filter(gift =>
+    Array.isArray(gift?.pieces) && gift.pieces.length &&
+    gift.pieces.every(id => typeof id === 'string') && typeof gift.note === 'string'
+  );
+} catch {
+  // A new bag remains available when storage is unavailable.
+}
 let statusTimer;
 try {
   const saved = JSON.parse(localStorage.getItem(storageKey));
@@ -69,9 +84,58 @@ function renderProducts() {
   }
 }
 
+function productFor(id) {
+  return catalog.find(product => String(product.id) === String(id));
+}
+
+function giftQuantity(id) {
+  return gifts.reduce((count, gift) => count + Number(gift.pieces.includes(String(id))), 0);
+}
+
+function available(id) {
+  return Math.max(0, Math.min(99, productFor(id)?.stock ?? 99) - giftQuantity(id));
+}
+
+function selectedGiftProducts() {
+  return [...giftOptions.querySelectorAll('input:checked')].map(input => productFor(input.value)).filter(Boolean);
+}
+
+function updateGiftTotal() {
+  const selected = selectedGiftProducts();
+  giftTotal.textContent = 'Gift subtotal ' + money(selected.reduce((sum, item) => sum + item.price, 0));
+  giftForm.querySelector('button').disabled = selected.length === 0;
+}
+
+function renderGiftOptions() {
+  const checked = new Set(selectedGiftProducts().map(item => String(item.id)));
+  giftOptions.innerHTML = catalog.filter(({ stock }) => stock !== 0).map(({ id, name, price }) => {
+    const canAdd = available(id) > (bag[id] || 0);
+    return `<label class="gift-option"><input type="checkbox" value="${id}" ${canAdd && checked.has(String(id)) ? 'checked' : ''} ${canAdd ? '' : 'disabled'}><span>${escape(name)}<small>${canAdd ? '' : 'Already at available quantity'}</small></span><span>${money(price)}</span></label>`;
+  }).join('') || '<p>No pieces are available for gifting right now.</p>';
+  updateGiftTotal();
+}
+
+function saveGifts() {
+  try { localStorage.setItem(giftKey, JSON.stringify(gifts)); } catch {
+    // Keep packages in memory when browser storage is unavailable.
+  }
+}
+
+function announce(message) {
+  status.textContent = message;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => { status.textContent = ''; }, 2400);
+}
+
 function renderBag() {
   const selected = catalog.filter(({ id }) => bag[id]);
-  bagCount.textContent = selected.reduce((sum, { id }) => sum + bag[id], 0);
+  const packages = gifts.map(gift => {
+    const pieces = gift.pieces.map(productFor);
+    const valid = pieces.every((piece, index) => piece &&
+      (piece.stock ?? 99) >= giftQuantity(gift.pieces[index]) + (bag[piece.id] || 0));
+    return { ...gift, pieces, valid, price: valid ? pieces.reduce((sum, piece) => sum + piece.price, 0) : 0 };
+  });
+  bagCount.textContent = selected.reduce((sum, { id }) => sum + bag[id], gifts.length);
   items.innerHTML = selected.map(({ id, name, price }) => `
     <div class="bag-item">
       <div><strong>${escape(name)}</strong><p>${money(price)}</p></div>
@@ -80,14 +144,24 @@ function renderBag() {
         <span>${bag[id]}</span>
         <button type="button" data-id="${id}" data-change="1" aria-label="Add one ${escape(name)}">+</button>
       </div>
-    </div>`).join('') || '<p>Your bag is empty.</p>';
-  total.innerHTML = selected.length
-    ? `<strong>Subtotal</strong><strong>${money(selected.reduce((sum, { id, price }) => sum + bag[id] * price, 0))}</strong>`
+    </div>`).join('');
+  items.innerHTML += packages.map(({ pieces, note, price, valid }, index) => `
+    <div class="bag-item">
+      <div><strong>Gift package</strong>
+        <p>${pieces.map(piece => piece ? escape(piece.name) : 'Unavailable item').join(', ')}</p>
+        ${note ? '<p class="gift-note">' + escape(note) + '</p>' : ''}
+        <p>${valid ? money(price) : 'Some items in this package are unavailable.'}</p>
+      </div>
+      <button type="button" data-remove-gift="${index}">Remove<span class="sr-only"> gift package</span></button>
+    </div>`).join('');
+  if (!selected.length && !packages.length) items.innerHTML = '<p>Your bag is empty.</p>';
+  total.innerHTML = selected.length || packages.some(gift => gift.valid)
+    ? `<strong>Subtotal</strong><strong>${money(selected.reduce((sum, { id, price }) => sum + bag[id] * price, packages.reduce((sum, gift) => sum + gift.price, 0)))}</strong>`
     : '';
 }
 
 function changeQuantity(id, change) {
-  bag[id] = Math.max(0, Math.min(catalog.find(item => String(item.id) === String(id))?.stock ?? 99, 99, (bag[id] || 0) + change));
+  bag[id] = Math.max(0, Math.min(available(id), (bag[id] || 0) + change));
   try {
     localStorage.setItem(storageKey, JSON.stringify(bag));
   } catch {
@@ -136,13 +210,36 @@ products.addEventListener('click', event => {
   if (!id) return;
   const product = catalog.find(item => String(item.id) === id);
   if (!product || product.stock === 0) return;
-  const atLimit = (bag[id] || 0) >= Math.min(99, product.stock ?? 99);
+  const atLimit = (bag[id] || 0) >= available(id);
   changeQuantity(id, 1);
   status.textContent = atLimit ? 'Maximum quantity reached.' : `${product.name} added to your bag.`;
   clearTimeout(statusTimer);
   statusTimer = setTimeout(() => { status.textContent = ''; }, 2400);
 });
+giftOptions.addEventListener('change', updateGiftTotal);
+giftForm.addEventListener('submit', event => {
+  event.preventDefault();
+  const pieces = selectedGiftProducts().map(({ id }) => String(id));
+  if (!pieces.length || pieces.some(id => available(id) <= (bag[id] || 0))) return;
+  gifts.push({ pieces, note: giftNote.value.trim().slice(0, 200) });
+  saveGifts();
+  giftForm.reset();
+  renderGiftOptions();
+  renderBag();
+  announce('Gift package added to your bag.');
+});
+
 items.addEventListener('click', event => {
+  const removeGift = event.target.closest('[data-remove-gift]');
+  if (removeGift) {
+    const index = Number(removeGift.dataset.removeGift);
+    gifts.splice(index, 1);
+    saveGifts();
+    renderBag();
+    renderGiftOptions();
+    (items.querySelector('[data-remove-gift="' + index + '"]') || document.querySelector('#close-bag')).focus();
+    return;
+  }
   const { id, change } = event.target.dataset;
   if (!id) return;
   changeQuantity(id, Number(change));
@@ -188,4 +285,5 @@ async function loadCatalog() {
   }
   renderProducts();
   renderBag();
+  renderGiftOptions();
 }
