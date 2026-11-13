@@ -250,6 +250,7 @@ document.querySelector('#open-bag').addEventListener('click', () => dialog.showM
 document.querySelector('#close-bag').addEventListener('click', () => dialog.close());
 renderProducts();
 renderBag();
+renderGiftOptions();
 loadCatalog();
 
 if ('IntersectionObserver' in window && window.matchMedia('(prefers-reduced-motion: no-preference)').matches) {
