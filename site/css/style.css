@@ -716,3 +716,13 @@ select, textarea, input { max-width: 100%; }
 #checkout-form > .btn { margin-top: 24px; }
 
 .salebar-wrap { display: contents; }
+
+/* ---------- back in stock ---------- */
+.notify { margin-top: 22px; padding: 20px; border-radius: var(--radius); background: var(--blush); }
+.notify label { display: block; margin-bottom: 10px; font: 500 1.25rem/1.2 var(--serif); }
+.notify__row { display: flex; gap: 10px; }
+.notify__row input { flex: 1; min-width: 0; padding: 12px 16px; border: 1px solid #cfaed3; border-radius: 999px; background: #fff; }
+.notify__row input:focus { outline: 0; border-color: var(--plum); box-shadow: 0 0 0 3px rgb(174 0 147 / 0.18); }
+.notify .field__hint { margin-top: 10px; }
+.notify--done { display: flex; align-items: center; gap: 10px; color: var(--plum); font-weight: 500; }
+@media (max-width: 640px) { .notify__row { flex-direction: column; } }

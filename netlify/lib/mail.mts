@@ -100,17 +100,17 @@ export async function sendStatusEmail(order: any, status: string, origin: string
 }
 
 /* Sends one message through Resend (or the local outbox). Returns { sent, reason }; never throws. */
-async function deliver(message: Record<string, unknown>, outboxKey: string, settings: Settings) {
+async function deliver(message: Record<string, unknown> | Record<string, unknown>[], outboxKey: string, settings: Settings) {
   if (Netlify.env.get("EMAIL_OUTBOX") === "local") {
     await getStore({ name: "outbox", consistency: "strong" }).setJSON(outboxKey, message);
     return { sent: true, reason: "" };
   }
   try {
-    const response = await fetch("https://api.resend.com/emails", {
+    const response = await fetch(Array.isArray(message) ? "https://api.resend.com/emails/batch" : "https://api.resend.com/emails", {
       method: "POST",
       headers: { Authorization: `Bearer ${resendKey()}`, "Content-Type": "application/json" },
       body: JSON.stringify(message),
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(15000),
     });
     if (response.ok) return { sent: true, reason: "" };
     const detail = await response.json().catch(() => ({})) as { name?: string; message?: string };
@@ -210,4 +210,40 @@ export async function sendStockAlert(items: { id: string; name: string; left: nu
 </table></td></tr></table></body></html>`;
   const name = (settings.email.fromName || "Glossy Gems by Zee").replace(/[<>"]/g, "");
   return deliver({ from: `${name} <${settings.email.fromAddress}>`, to: [to], subject, html, tags: [{ name: "status", value: "stock-alert" }] }, `${ref}-stock`, settings);
+}
+
+/* Back in stock: one email per waiting customer, in batches. Returns the addresses actually sent to. */
+export async function sendRestockEmails(product: any, emails: string[], origin: string, settings: Settings) {
+  if (!emailReady(settings).on) return { sent: [] as string[], reason: "Emails are not switched on, so waiting customers can't be told yet." };
+  const photo = product.photos?.[0];
+  const image = photo ? (/^[a-f0-9-]{36}$/.test(photo) ? `${origin}/media/${photo}` : `${origin}/${photo}`) : "";
+  const link = `${origin}/product.html?id=${encodeURIComponent(product.id)}`;
+  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#fdeeff;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdeeff;padding:24px 12px;font-family:Arial,Helvetica,sans-serif;color:#2a0f2e;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;">
+<tr><td style="background:#2c0a31;padding:24px 28px;color:#f5cc7e;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:24px;">Glossy Gems <span style="font-style:normal;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:3px;color:#ffffff;">BY ZEE</span></td></tr>
+${image ? `<tr><td><img src="${esc(image)}" alt="${esc(product.name)}" width="560" style="display:block;width:100%;max-width:560px;height:auto;"></td></tr>` : ""}
+<tr><td style="padding:28px;">
+<h1 style="margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:28px;line-height:1.15;">It's back: ${esc(product.name)}</h1>
+<p style="margin:0 0 6px;font-size:16px;line-height:1.5;">You asked us to tell you when this piece was back in stock. It is, and it's ${esc(money(product.price))}.</p>
+<p style="margin:0 0 24px;font-size:16px;line-height:1.5;">Pieces can sell out again quickly.</p>
+<p style="margin:0 0 8px;"><a href="${esc(link)}" style="display:inline-block;background:#690365;color:#ffffff;text-decoration:none;padding:13px 24px;border-radius:999px;font-weight:600;font-size:15px;">See it in the store</a></p>
+</td></tr>
+<tr><td style="padding:16px 28px;background:#2a3135;color:#c7d0d4;font-size:12px;line-height:1.6;">This was a one-time email you asked for. We've now removed your address from the list and won't email you again about it. <a href="${esc(origin)}/privacy.html" style="color:#f5cc7e;">Privacy policy</a><br>GLOSSYGEMZ BY ZEE ENTERPRISES · CAC registration no. 8636509 · Magboro, Ogun State, Nigeria</td></tr>
+</table></td></tr></table></body></html>`;
+  const name = (settings.email.fromName || "Glossy Gems by Zee").replace(/[<>"]/g, "");
+  const sent: string[] = [];
+  for (let i = 0; i < emails.length; i += 50) {
+    const chunk = emails.slice(i, i + 50);
+    const messages = chunk.map(to => {
+      const message: Record<string, unknown> = { from: `${name} <${settings.email.fromAddress}>`, to: [to], subject: `It's back: ${product.name}`, html, tags: [{ name: "status", value: "back-in-stock" }] };
+      if (settings.email.replyTo) message.reply_to = settings.email.replyTo;
+      return message;
+    });
+    const result = await deliver(messages, `${product.id}-restock-${i}`, settings);
+    if (!result.sent) return { sent, reason: result.reason };
+    sent.push(...chunk);
+  }
+  return { sent, reason: "" };
 }

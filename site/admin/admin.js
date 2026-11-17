@@ -542,6 +542,9 @@
       ? { ...existing, photos: [...existing.photos], members: [...existing.members], sizes: [...existing.sizes], customCash: existing.cashMin != null }
       : { name: '', type: id === 'new-gift' ? GIFT_TYPE : 'Earrings', price: '', stock: 1, description: '', sizes: [], photos: [], members: [], published: false, customCash: false, cashMin: '', cashMax: '' };
     let deleting = false;
+    /* Customers waiting for this piece to come back in stock. */
+    let waiting = [];
+    if (existing) { try { waiting = (await api('waiting?id=' + encodeURIComponent(existing.id))).list; } catch { waiting = []; } }
 
     const draw = () => {
       const combo = draft.type === 'Combos';
@@ -579,6 +582,11 @@
             ${single.length ? `<div class="picks">${single.map(product => `<label class="check"><input type="checkbox" data-member value="${esc(product.id)}" ${draft.members.includes(product.id) ? 'checked' : ''}><span>${esc(product.name)}</span></label>`).join('')}</div>` : '<p class="field__hint">Add single pieces first, then build a combo from them.</p>'}
             <p class="field__hint">Choose at least two. A combo has its own price and its own stock.</p>
           </section>
+          ${waiting.length ? `<section class="panel"><h2>Waiting for a restock (${waiting.length})</h2>
+            <p class="field__hint">These customers asked to be emailed once when this piece is back. Raise the stock and save, and they're emailed automatically, then removed from the list.</p>
+            <ul class="items waitlist">${waiting.map(entry => `<li><span>${esc(entry.email)}<small>Asked ${when(entry.at)}</small></span><button class="textlink" type="button" data-unwait="${esc(entry.email)}">Remove</button></li>`).join('')}</ul>
+            ${existing && existing.published && existing.stock > 0 ? '<div class="actions"><button class="btn btn--ghost btn--small" type="button" data-send-waiting>Email them now</button></div>' : ''}
+          </section>` : ''}
           <section class="panel"><h2>Photos</h2>
             <p class="field__hint">${combo ? 'Optional for a combo. Without one, the store shows its pieces together.' : 'The first photo is the cover. Square photos look best.'}</p>
             <div class="photos">${draft.photos.map((photo, index) => `<div class="photo">
@@ -597,7 +605,23 @@
           ? `<span class="confirm">Delete ${esc(existing.name)} for good? ${esc(comboWarning())} <button class="btn btn--danger btn--small" type="button" data-delete>Yes, delete</button><button class="btn btn--ghost btn--small" type="button" data-keep>Keep</button></span>`
           : `<button class="textlink" type="button" data-ask-delete>Delete this product</button>`}</div>` : ''}`;
       wire();
+      wireWaiting();
     };
+
+    /* Bound on each draw, like the rest of the editor, so handlers never pile up. */
+    function wireWaiting() {
+      for (const button of $$('[data-unwait]', view)) button.addEventListener('click', () => busy(button, 'Removing…', async () => {
+        waiting = (await api('waiting', { method: 'POST', body: { id: existing.id, remove: button.dataset.unwait } })).list;
+        say('Removed from the waiting list.');
+        draw();
+      }));
+      $('[data-send-waiting]', view)?.addEventListener('click', event => busy(event.target, 'Sending…', async () => {
+        const { result, list } = await api('waiting', { method: 'POST', body: { id: existing.id, send: true } });
+        waiting = list;
+        say(result.left ? `Emailed ${result.sent}; ${result.left} still waiting: ${result.reason}` : `Emailed ${result.sent} waiting customer${result.sent === 1 ? '' : 's'}.`);
+        draw();
+      }));
+    }
 
     /* Deleting a piece also takes it out of any combo. Say so before the owner confirms. */
     const comboWarning = () => state.products.filter(product => product.members.includes(existing.id)).map(combo =>
@@ -665,7 +689,11 @@
           const result = await api('products', { method: 'POST', body: { product: { ...draft, stockWas: existing?.stock } } });
           state.products = result.products;
           state.dirty = false;
-          say(draft.published ? 'Saved. It is live in the store.' : 'Saved as a draft.');
+          const told = (result.restocked || []).reduce((sum, item) => sum + item.sent, 0);
+          const stuck = (result.restocked || []).find(item => item.left);
+          say(stuck ? `Saved. ${told ? `Emailed ${told} waiting customer${told === 1 ? '' : 's'}; ` : ''}${stuck.left} still waiting: ${stuck.reason}`
+            : told ? `Saved. Emailed ${told} customer${told === 1 ? '' : 's'} who were waiting for it.`
+            : draft.published ? 'Saved. It is live in the store.' : 'Saved as a draft.');
           const target = '#/products/' + encodeURIComponent(result.product.id);
           if (location.hash === target) route(); else location.hash = target;
         });

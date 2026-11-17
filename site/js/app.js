@@ -82,6 +82,8 @@
     gifts = gifts.filter(gift => gift.pieces.every(key => { const product = byId(split(key).id); return product && product.stock > 0; }));
     write('ggz-bag', bag);
     write('ggz-gifts', gifts);
+    const waiting = read('ggz-notify', []);
+    if (Array.isArray(waiting) && waiting.length) write('ggz-notify', waiting.filter(id => byId(id)?.stock === 0));
   }
 
   /* ---------- catalogue helpers ---------- */
@@ -745,6 +747,17 @@
               <button class="save save--inline" type="button" data-save="${esc(item.id)}" aria-pressed="${saved.includes(String(item.id))}" aria-label="Save ${name}">${icon('heart')}</button>
             </div>
             <p class="field__error" data-buy-error hidden></p>
+            ${soldOut ? (onNotifyList(item.id)
+              ? `<p class="notify notify--done" role="status">${icon('check')} You're on the list. We'll email you once when the ${name} is back.</p>`
+              : `<form class="notify" data-notify novalidate>
+                  <label for="notify-email">Email me when it's back</label>
+                  <div class="notify__row">
+                    <input id="notify-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" aria-describedby="notify-hint notify-error">
+                    <button class="btn btn--primary" type="submit">Notify me</button>
+                  </div>
+                  <p class="field__error" id="notify-error" hidden></p>
+                  <p class="field__hint" id="notify-hint">One email when this piece is back, then we delete your address. <a class="textlink" href="/privacy.html" target="_blank">Privacy policy</a></p>
+                </form>`) : ''}
             <a class="btn btn--ghost btn--block" href="${wa(`Hello Zee, I'd like to ${soldOut ? 'ask about' : 'order'} the ${item.name} (${money(item.price)}) from ${GG.brand.name}.`)}" target="_blank" rel="noopener">${icon('chat')} ${soldOut ? 'Ask Zee about this piece' : 'Order this on WhatsApp'}</a>
             <ul class="facts">
               <li>${icon('truck')} <span>We deliver nationwide. <a href="/help.html">Delivery and returns</a></span></li>
@@ -766,6 +779,29 @@
     }
 
     draw();
+    root.addEventListener('submit', async event => {
+      if (!event.target.matches('[data-notify]')) return;
+      event.preventDefault();
+      const item = byId(params.get('id'));
+      const form = event.target;
+      const email = form.email.value.trim();
+      const error = $('#notify-error');
+      const fail = message => { error.textContent = message; error.hidden = false; form.email.setAttribute('aria-invalid', 'true'); form.email.focus(); };
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return fail('Enter your email address, like you@example.com.');
+      const button = $('button', form);
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/restock', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: item.id, email }) });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) { button.disabled = false; return fail(data.error || (response.status === 429 ? 'Too many tries. Wait a minute and try again.' : 'That didn\'t work. Try again.')); }
+        write('ggz-notify', [...new Set([...read('ggz-notify', []).filter(id => typeof id === 'string'), item.id])].slice(-50));
+        draw();
+        say("You're on the list.");
+      } catch {
+        button.disabled = false;
+        fail('We could not reach the store. Check your connection and try again.');
+      }
+    });
     root.addEventListener('click', event => {
       const item = byId(params.get('id'));
       if (!item) return;
@@ -1260,6 +1296,9 @@
       root.innerHTML = `<div class="empty"><p class="empty__title">We couldn't load this post.</p><p>Check your connection and try again.</p><button class="btn btn--primary" type="button" data-reload>Try again</button></div>`;
     });
   }
+
+  /* Pieces this browser asked to hear about. Forgotten once the piece is back on sale. */
+  const onNotifyList = id => { const list = read('ggz-notify', []); return Array.isArray(list) && list.includes(id); };
 
   /* ---------- order tracking ---------- */
   const trackHref = order => `/order.html?ref=${encodeURIComponent(order.ref)}&t=${encodeURIComponent(order.token)}`;

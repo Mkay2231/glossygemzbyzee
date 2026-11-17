@@ -13,6 +13,7 @@ The online store and owner dashboard for Glossy Gems by Zee. Everything runs on 
 | `netlify/functions/media.mts` | `GET /media/:id`: serves uploaded product photos. |
 | `netlify/functions/admin.mts` | `/api/admin/*`: everything the dashboard does. Needs a signed-in owner. |
 | `netlify/functions/blog.mts` | `/api/blog`: published blog posts for the store. |
+| `netlify/functions/restock.mts` | `/api/restock`: back-in-stock sign-ups for sold-out pieces. |
 | `netlify/functions/track.mts` | `/api/track`: a customer's view of their own order, by private link or by order number plus phone. |
 | `netlify/lib/mail.mts` | The paid, shipped and delivered emails, sent through Resend. |
 | `netlify/lib/lgas.mts`, `site/js/lgas.js` | The 774 local government areas by state. Keep the two copies identical. |
@@ -99,6 +100,7 @@ The store starts with seven sample products carried over from the first site. Ed
 - **One owner login.** There are no staff accounts.
 - **Small-shop storage.** Netlify Blobs suits a catalogue of hundreds of products and a few thousand orders. A much busier store should move orders to a real database.
 - **Combos and stock.** A combo shows as sold out (and can't be ordered) the moment any of its pieces sells out. Selling a combo lowers the combo's own stock, not the stock of the pieces inside it.
+- **Back in stock:** sold-out product pages (combos included) let customers leave an email. When the piece comes back on sale (stock raised, or a cancelled order returns it), each person gets one email and their address is deleted. The product editor shows who is waiting, with Remove and "Email them now". Each email counts towards Resend's daily limit; anyone not reached stays on the list.
 - **Stock alerts** email the alerts address when an order leaves a piece at or below the level in Settings (0 = when it sells out). Sold-out pieces are listed after available ones everywhere in the store.
 - **Rate limits.** Order and dashboard endpoints ask Netlify to rate-limit by IP. Check the limits are active on the site's plan after the first deploy.
 

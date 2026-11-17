@@ -5,6 +5,7 @@ import {
   json, fail, text, whole, sameOrigin, TYPES, GIFT_TYPE, STATUSES, DEFAULT_SETTINGS, readBlog, writeBlog, type Post, trackUrl, type Product,
 } from "../lib/store.mts";
 import { sendStatusEmail, emailReady, EMAIL_STATUSES } from "../lib/mail.mts";
+import { notifyRestocks, sendToWaitlist, readWaitlist, changeWaitlist, dropWaitlist, waitingCounts, onSale } from "../lib/restock.mts";
 import { readOwner, signedIn, setup, login, changePassword, clearCookie } from "../lib/auth.mts";
 
 const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
@@ -29,7 +30,7 @@ async function dropUnused(ids: string[], products: Product[], posts?: Post[]) {
   await Promise.all(ids.filter(id => UUID.test(id) && !used.has(id)).map(id => photos().delete(id)));
 }
 
-async function saveProduct(body: any) {
+async function saveProduct(body: any, origin: string) {
   const input = body?.product || {};
   const name = text(input.name, 120);
   const type = TYPES.includes(input.type) ? input.type : "";
@@ -57,7 +58,9 @@ async function saveProduct(body: any) {
   }
 
   let removed: string[] = [];
+  let before: Product[] = [];
   const saved = await changeCatalog(products => {
+    before = products;
     const existing = input.id ? products.find(product => product.id === input.id) : undefined;
     if (input.id && !existing) throw new Refuse("This product no longer exists. Reload the page.", 404);
     if (existing && existing.updatedAt !== input.updatedAt) throw new Refuse("This product was changed somewhere else. Reload it before saving.", 409);
@@ -86,7 +89,8 @@ async function saveProduct(body: any) {
     return { products: next, result: { product, products: next } };
   });
   await dropUnused(removed, saved.products);
-  return saved;
+  const restocked = await notifyRestocks(before, saved.products, origin);
+  return { ...saved, restocked };
 }
 
 async function deleteProduct(id: string) {
@@ -111,6 +115,7 @@ async function deleteProduct(id: string) {
     return { products: next, result: next };
   });
   await dropUnused(removed, products);
+  await dropWaitlist(id);
   return { products, trimmed, hidden };
 }
 
@@ -157,6 +162,7 @@ async function updateOrder(body: any, origin: string) {
   if (order.erasedAt && (body.note !== undefined || body.resend)) throw new Refuse("This customer's details were erased.", 409);
 
   let changedTo = "";
+  let restockedOnCancel: Awaited<ReturnType<typeof notifyRestocks>> = [];
   if (body.status !== undefined) {
     if (!STATUSES.includes(body.status)) throw new Refuse("That is not a status this store uses.");
     if (order.status === "cancelled" && body.status !== "cancelled") throw new Refuse("A cancelled order cannot be reopened. Ask the customer to order again.", 409);
@@ -164,11 +170,14 @@ async function updateOrder(body: any, origin: string) {
       const back = new Map<string, number>();
       for (const line of order.items) back.set(line.id, (back.get(line.id) || 0) + line.qty);
       for (const gift of order.gifts) for (const piece of gift.pieces) back.set(piece.id, (back.get(piece.id) || 0) + 1);
-      await changeCatalog(products => ({
-        products: products.map(product => back.has(product.id) ? { ...product, stock: product.stock + back.get(product.id)! } : product),
-        result: null,
-      }));
+      let before: Product[] = [];
+      const after = await changeCatalog(products => {
+        before = products;
+        const next = products.map(product => back.has(product.id) ? { ...product, stock: product.stock + back.get(product.id)! } : product);
+        return { products: next, result: next };
+      });
       order.restocked = true;
+      restockedOnCancel = await notifyRestocks(before, after, origin);
     }
     if (order.status !== body.status) {
       order.history = [...(order.history?.length ? order.history : [{ status: "new", at: order.createdAt }]), { status: body.status, at: new Date().toISOString() }];
@@ -196,7 +205,7 @@ async function updateOrder(body: any, origin: string) {
       if ((await shop().setJSON(key, saved, { onlyIfMatch: latest.etag })).modified) { order.emails = saved.emails; break; }
     }
   }
-  return { order: { ...order, key, track: trackUrl(origin, order) }, email };
+  return { order: { ...order, key, track: trackUrl(origin, order) }, email, restocked: restockedOnCancel };
 }
 
 /* ---------- blog ---------- */
@@ -336,7 +345,26 @@ export default async (req: Request, context: Context) => {
       return result.error ? fail(result.error) : json({ ok: true }, 200, { "Set-Cookie": result.cookie });
     }
     if (route === "products" && get) return json({ products: (await readCatalog()).products });
-    if (route === "products" && req.method === "POST") return json(await saveProduct(body));
+    if (route === "products" && req.method === "POST") return json(await saveProduct(body, new URL(req.url).origin));
+    if (route === "waiting" && get) {
+      const id = new URL(req.url).searchParams.get("id");
+      return json(id ? { list: await readWaitlist(id) } : { counts: await waitingCounts() });
+    }
+    if (route === "waiting" && req.method === "POST") {
+      const id = text(body.id, 80);
+      if (body.remove) {
+        const email = text(body.remove, 120).toLowerCase();
+        return json({ list: await changeWaitlist(id, list => list.filter(entry => entry.email !== email)) });
+      }
+      if (body.send === true) {
+        const { products } = await readCatalog();
+        const product = products.find(item => item.id === id);
+        if (!product) throw new Refuse("This product no longer exists.", 404);
+        if (!onSale(product, products)) throw new Refuse("Put it back in stock and show it in the store before emailing the waiting list.", 409);
+        return json({ result: await sendToWaitlist(product, new URL(req.url).origin), list: await readWaitlist(id) });
+      }
+      throw new Refuse("Nothing to do.");
+    }
     if (route.startsWith("products/") && req.method === "DELETE") return json(await deleteProduct(decodeURIComponent(route.slice(9))));
     if (route === "photos" && req.method === "POST") return json(await uploadPhoto(req), 201);
     if (route === "orders" && get) return json({ orders: await listOrders() });
