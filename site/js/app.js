@@ -125,14 +125,20 @@
     return `<span class="price price--sale"><s><span class="sr-only">Was </span>${money(product.price)}</s> <span class="sr-only">Now </span>${money(off(product.price))}</span>`;
   }
 
+  /* On computers, pointing at a card shows the product's second photo. Phones can't hover,
+     so they never download it. */
+  const canHover = window.matchMedia?.('(hover: hover) and (pointer: fine)').matches;
+  const altPhoto = product => canHover && product.photos.length > 1
+    ? `<img class="card__alt" src="${esc(photoUrl(product.photos[1]))}" alt="" width="512" height="512" loading="lazy">` : '';
+
   function media(product, eager) {
     const loading = eager ? '' : ' loading="lazy"';
     if (!product.members) {
-      return `<img src="${esc(src(product))}" alt="${esc(product.name)}" width="512" height="512"${loading}>`;
+      return `<img src="${esc(src(product))}" alt="${esc(product.name)}" width="512" height="512"${loading}>${altPhoto(product)}`;
     }
     const members = product.members.map(byId).filter(Boolean);
     if (product.photos.length || !members.length) {
-      return `<img src="${esc(src(product))}" alt="${esc(product.name)}" width="512" height="512"${loading}>`;
+      return `<img src="${esc(src(product))}" alt="${esc(product.name)}" width="512" height="512"${loading}>${altPhoto(product)}`;
     }
     const shown = members.slice(0, 3);
     return `<span class="cluster cluster--${shown.length}" role="img" aria-label="${esc(product.name)}: ${esc(members.map(m => m.name).join(', '))}">${
@@ -338,6 +344,7 @@
     const bar = $('.salebar');
     const state = saleState();
     bar.hidden = state === 'over';
+    bar.classList.toggle('is-live', state === 'active');
     if (state === 'over') return;
     const sale = GG.sale;
     const gift = sale.giftOver ? `Free gift over ${money(sale.giftOver)} · ` : '';
@@ -508,7 +515,28 @@
   });
 
   /* ---------- home ---------- */
+  /* Home sections ease up into place as they scroll into view. Content is only held back once
+     this has started, so nothing is hidden if scripts fail, and people who ask their device
+     for less motion see everything straight away. */
+  function reveal() {
+    if (!('IntersectionObserver' in window) || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    const sections = $$('main > section:not(.hero)');
+    const watch = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        entry.target.classList.add('is-in');
+        watch.unobserve(entry.target);
+      }
+    }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
+    for (const section of sections) {
+      section.classList.add('reveal');
+      watch.observe(section);
+    }
+    document.documentElement.classList.add('reveal-on');
+  }
+
   function home() {
+    reveal();
     const dust = $('.dust');
     if (dust) {
       let seed = 7;
@@ -527,6 +555,7 @@
       const state = saleState();
       const seal = $('.seal');
       seal.hidden = state === 'over';
+      seal.classList.toggle('is-live', state === 'active');
       if (state !== 'over') {
         $('.seal b').textContent = GG.sale.percent + '%';
         $('.seal__when').textContent = state === 'upcoming' ? 'from ' + saleStart() : 'until ' + saleEnd();
