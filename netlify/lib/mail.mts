@@ -30,8 +30,11 @@ const COPY: Record<string, { subject: (ref: string) => string; heading: string; 
   },
 };
 
+/* Keys pasted into a dashboard often pick up spaces, line breaks or quote marks. */
+const resendKey = () => (Netlify.env.get("RESEND_API_KEY") || "").trim().replace(/^["']+|["']+$/g, "").trim();
+
 export function emailReady(settings: Settings) {
-  const key = Boolean(Netlify.env.get("RESEND_API_KEY")) || Netlify.env.get("EMAIL_OUTBOX") === "local";
+  const key = Boolean(resendKey()) || Netlify.env.get("EMAIL_OUTBOX") === "local";
   return { key, sender: Boolean(settings.email.fromAddress), on: key && Boolean(settings.email.fromAddress) };
 }
 
@@ -100,7 +103,7 @@ export async function sendStatusEmail(order: any, status: string, origin: string
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { Authorization: `Bearer ${Netlify.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${resendKey()}`, "Content-Type": "application/json" },
       body: JSON.stringify(message),
       signal: AbortSignal.timeout(10000),
     });
@@ -112,7 +115,7 @@ export async function sendStatusEmail(order: any, status: string, origin: string
     if (detail.name === "monthly_quota_exceeded") return { sent: false, reason: "This month's email limit is used up. Upgrade the Resend plan or send it again next month." };
     if (detail.name === "rate_limit_exceeded") return { sent: false, reason: "Resend is busy. Send it again in a moment." };
     if (/not verified|own email address/i.test(text)) return { sent: false, reason: "The sending domain isn't verified in Resend yet, or the address in Settings isn't on it." };
-    if (response.status === 401 || /api key/i.test(text)) return { sent: false, reason: "Resend refused the key. Check RESEND_API_KEY on the site." };
+    if (response.status === 401 || /api key/i.test(text)) return { sent: false, reason: `Resend refused the key: "${text || detail.name || response.status}". Create a new key in Resend and paste it into RESEND_API_KEY on Netlify.` };
     return { sent: false, reason: `Resend did not send it (${text || "error " + response.status}).` };
   } catch {
     return { sent: false, reason: "Could not reach Resend. Try sending again in a moment." };
