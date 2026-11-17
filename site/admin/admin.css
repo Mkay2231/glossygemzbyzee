@@ -231,4 +231,4 @@ a.row:hover { background: var(--blush); }
 .video-pick video { display: block; width: min(100%, 360px); aspect-ratio: 9 / 16; max-height: 420px; border-radius: 12px; background: var(--plum-950); object-fit: contain; }
 .video-pick .field__hint { margin-top: 10px; }
 .progress { height: 6px; margin-top: 12px; border-radius: 999px; background: #f6e8f7; overflow: hidden; }
-.progress span { display: block; width: 0; height: 100%; background: var(--orchid); transition: width .3s var(--out); }
+.progress span { display: block; height: 100%; background: var(--orchid); transform: scaleX(0); transform-origin: left; transition: transform .3s var(--out); }

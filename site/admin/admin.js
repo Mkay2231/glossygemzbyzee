@@ -896,7 +896,7 @@
           bar.hidden = false;
           draft.video = await uploadVideo(file, share => {
             status.textContent = `Uploading… ${Math.round(share * 100)}%`;
-            bar.firstElementChild.style.width = (share * 100).toFixed(1) + '%';
+            bar.firstElementChild.style.transform = `scaleX(${share.toFixed(3)})`;
           });
           state.dirty = true;
           draw();
