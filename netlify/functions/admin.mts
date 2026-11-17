@@ -6,6 +6,7 @@ import {
 } from "../lib/store.mts";
 import { sendStatusEmail, emailReady, EMAIL_STATUSES } from "../lib/mail.mts";
 import { notifyRestocks, sendToWaitlist, readWaitlist, changeWaitlist, dropWaitlist, waitingCounts, onSale } from "../lib/restock.mts";
+import { readDays, dayOf } from "../lib/stats.mts";
 import { readOwner, signedIn, setup, login, changePassword, clearCookie } from "../lib/auth.mts";
 
 const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
@@ -318,6 +319,45 @@ async function saveSettings(body: any) {
   return { settings: next, email: emailReady(next) };
 }
 
+/* The Visitors page: one row per day for the chosen period (empty days included),
+   the same totals for the period before it, and what people looked at. */
+async function visitorReport(span: number) {
+  const today = dayOf();
+  const dayAt = (back: number) => dayOf(Date.now() - back * 86400_000);
+  const from = dayAt(span - 1);
+  const before = dayAt(span * 2 - 1);
+  const [records, orders, { products }] = await Promise.all([readDays(before, today), listOrders(), readCatalog()]);
+  const ordersOn = new Map<string, number>();
+  for (const order of orders) { const day = dayOf(order.createdAt); ordersOn.set(day, (ordersOn.get(day) || 0) + 1); }
+
+  const byDay = new Map(records.map(record => [record.day, record]));
+  const days = Array.from({ length: span }, (_, index) => {
+    const day = dayAt(span - 1 - index);
+    const record = byDay.get(day);
+    return { day, visitors: record?.visitors || 0, views: record?.views || 0, orders: ordersOn.get(day) || 0 };
+  });
+  const sum = (rows: { visitors: number; views: number; orders: number }[]) =>
+    rows.reduce((total, row) => ({ visitors: total.visitors + row.visitors, views: total.views + row.views, orders: total.orders + row.orders }), { visitors: 0, views: 0, orders: 0 });
+  const earlier = records.filter(record => record.day < from).map(record => ({ ...record, orders: 0 }));
+  for (const [day, count] of ordersOn) if (day >= before && day < from) earlier.push({ day, visitors: 0, views: 0, orders: count } as any);
+
+  const inRange = records.filter(record => record.day >= from);
+  const merge = (pick: (record: typeof records[number]) => Record<string, number>, limit: number) => {
+    const totals = new Map<string, number>();
+    for (const record of inRange) for (const [key, count] of Object.entries(pick(record) || {})) totals.set(key, (totals.get(key) || 0) + count);
+    return [...totals].sort((a, b) => b[1] - a[1]).slice(0, limit).map(([key, count]) => ({ key, count }));
+  };
+  const names = new Map(products.map(product => [product.id, product.name]));
+  return {
+    today, span, days,
+    totals: sum(days), previous: sum(earlier),
+    pages: merge(record => record.pages, 10),
+    products: merge(record => record.products, 10).map(row => ({ ...row, name: names.get(row.key) || "" })),
+    sources: merge(record => record.sources, 10),
+    devices: merge(record => record.devices, 3),
+  };
+}
+
 export default async (req: Request, context: Context) => {
   const route = context.params[0] || "";
   const get = req.method === "GET";
@@ -368,6 +408,10 @@ export default async (req: Request, context: Context) => {
     if (route.startsWith("products/") && req.method === "DELETE") return json(await deleteProduct(decodeURIComponent(route.slice(9))));
     if (route === "photos" && req.method === "POST") return json(await uploadPhoto(req), 201);
     if (route === "orders" && get) return json({ orders: await listOrders() });
+    if (route === "visitors" && get) {
+      const span = Number(new URL(req.url).searchParams.get("days"));
+      return json(await visitorReport([7, 30, 90].includes(span) ? span : 30));
+    }
     if (route === "order" && get) {
       const key = new URL(req.url).searchParams.get("key") || "";
       const order = /^orders\/\d+-GGZ-[A-F0-9]{6}$/.test(key) ? await shop().get(key, { type: "json" }) : null;

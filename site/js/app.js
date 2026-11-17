@@ -1449,6 +1449,26 @@
     return render;
   }
 
+  /* ---------- visit counting ---------- */
+  /* One anonymous page view for the owner's Visitors page: the page, the product being looked at,
+     and where the visit came from. No cookies and nothing stored in the browser.
+     Browsers that ask not to be tracked (Global Privacy Control or Do Not Track) are not counted. */
+  function countVisit() {
+    try {
+      if (navigator.globalPrivacyControl || navigator.doNotTrack === '1' || window.doNotTrack === '1') return;
+      const path = page === 'lost' ? '/404.html'
+        : location.pathname.replace(/\/index(\.html)?$/, '/').replace(/^(\/[a-z0-9-]+)$/i, '$1.html');
+      let source = params.get('utm_source') || params.get('src') || '';
+      if (!source && document.referrer) {
+        const from = new URL(document.referrer);
+        if (from.host !== location.host) source = from.hostname;
+      }
+      const body = JSON.stringify({ page: path, product: page === 'product' ? params.get('id') || '' : '', source: source.slice(0, 80) });
+      if (navigator.sendBeacon?.('/api/hit', new Blob([body], { type: 'application/json' }))) return;
+      fetch('/api/hit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => {});
+    } catch { /* counting must never break the page */ }
+  }
+
   /* ---------- start ---------- */
   const cached = read('ggz-store', null);
   if (cached && Array.isArray(cached.products)) apply(cached);
@@ -1480,4 +1500,5 @@
     refresh();
   }
   load();
+  countVisit();
 })();

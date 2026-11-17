@@ -27,11 +27,12 @@
     arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
     image: '<path d="M4 5h16v14H4z"/><path d="m4 15.500 4.500-4.500 4 4 3-3 4.500 4.500"/><circle cx="15.500" cy="9" r="1.500"/>',
+    visitors: '<path d="M4 19.500h16"/><path d="M7 16.500v-5M12 16.500V6M17 16.500v-8"/>',
     chat: '<path d="M4 5h16v11.500H10L5.500 20v-3.500H4V5Z"/><path d="M8 9.500h8M8 12.500h5"/>'
   };
   const icon = name => `<svg class="icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 
-  const state = { email: '', orders: [], products: [], settings: null, filter: 'open', productFilter: 'all', query: '', dirty: false, timer: 0 };
+  const state = { email: '', orders: [], products: [], settings: null, filter: 'open', productFilter: 'all', query: '', dirty: false, timer: 0, span: 30 };
 
   let toastTimer;
   function say(message) {
@@ -124,6 +125,7 @@
           <div class="side__brand"><img src="/assets/img/logo-badge.jpg" width="44" height="44" alt=""><span>Glossy Gems<small>Dashboard</small></span></div>
           <a href="#/orders" data-nav="orders">${icon('orders')}<span>Orders</span><span class="side__badge" data-new hidden></span></a>
           <a href="#/products" data-nav="products">${icon('products')}<span>Products</span></a>
+          <a href="#/visitors" data-nav="visitors">${icon('visitors')}<span>Visitors</span></a>
           <a href="#/blog" data-nav="blog">${icon('blog')}<span>Blog</span></a>
           <a href="#/settings" data-nav="settings">${icon('settings')}<span>Settings</span></a>
           <div class="side__foot">
@@ -162,6 +164,7 @@
     window.scrollTo(0, 0);
     if (section === 'products') return id ? productEditor(view, id) : productList(view);
     if (section === 'settings') return settingsView(view);
+    if (section === 'visitors') return visitorsView(view);
     if (section === 'blog') return id ? postEditor(view, id) : postList(view);
     return id ? orderDetail(view, id) : orderList(view);
   }
@@ -404,6 +407,141 @@
   }
 
   /* Phone photos are large. Shrink to 1600px on the long side before uploading. */
+  /* ---------- visitors ---------- */
+  const PAGE_NAMES = {
+    '/': 'Home', '/shop.html': 'Shop', '/product.html': 'Product pages', '/gift.html': 'Gift Builder', '/checkout.html': 'Checkout',
+    '/help.html': 'Help', '/order.html': 'Order tracking', '/blog.html': 'Blog', '/post.html': 'Blog posts', '/privacy.html': 'Privacy policy',
+    '/terms.html': 'Terms', '/refunds.html': 'Returns and refunds', '/cookies.html': 'Cookie policy', '/404.html': 'Page not found'
+  };
+  const count = value => Math.round(value).toLocaleString('en-NG');
+  const dayLabel = (day, long) => new Intl.DateTimeFormat('en-GB', { ...(long ? { weekday: 'short' } : {}), day: 'numeric', month: 'short', timeZone: 'UTC' }).format(new Date(day + 'T12:00:00Z'));
+
+  /* "Up 12% on the 30 days before", or nothing when there's no earlier period to compare with. */
+  function change(now, before, span) {
+    if (!before) return '';
+    const diff = Math.round((now - before) / before * 100);
+    return `<span class="tile__note">${diff ? `${diff > 0 ? 'Up' : 'Down'} ${Math.abs(diff)}% on` : 'Same as'} the ${span} days before</span>`;
+  }
+
+  /* A ranked list. The thin bar under each row shows its size against the top row. */
+  function ranked(title, rows, label, value, empty) {
+    const top = rows[0]?.count || 1;
+    return `<section class="panel"><h2>${title}</h2>${rows.length ? `<ol class="ranks">${rows.map(row => `<li>
+        <span class="ranks__label">${label(row)}</span><span class="ranks__num">${value(row)}</span>
+        <span class="ranks__bar" data-var="--share:${(row.count / top * 100).toFixed(1)}%" aria-hidden="true"></span></li>`).join('')}</ol>`
+      : `<p class="field__hint">${empty}</p>`}</section>`;
+  }
+
+  /* A round top for the y-axis: 1, 2 or 5 times a power of ten, at least as big as the busiest day. */
+  function niceCeiling(max) {
+    if (max <= 4) return 4;
+    const power = Math.pow(10, Math.floor(Math.log10(max)));
+    return [1, 2, 2.5, 5, 10].map(m => m * power).find(top => top >= max && Number.isInteger(top / 2));
+  }
+
+  async function visitorsView(view) {
+    view.innerHTML = '<p class="loading" role="status">Loading visitors…</p>';
+    let report;
+    try { report = await api('visitors?days=' + state.span); }
+    catch (error) { view.innerHTML = `<div class="empty"><p class="empty__title">${esc(error.message)}</p></div>`; return; }
+    if (location.hash !== '#/visitors') return;
+    const { days, totals, previous, span } = report;
+    const ceiling = niceCeiling(Math.max(...days.map(day => day.visitors)));
+    const devices = report.devices.reduce((sum, row) => sum + row.count, 0);
+    const busiest = days.reduce((best, day) => day.visitors > best.visitors ? day : best, days[0]);
+    const rate = totals.visitors ? (totals.orders / totals.visitors * 100).toFixed(1) : '–';
+
+    view.innerHTML = `
+      <div class="head"><div><h1>Visitors</h1>
+        <p>Who came to the store, counted without cookies. Your own visits while signed in aren't counted.</p></div></div>
+      <div class="tabs" role="group" aria-label="Period">${[7, 30, 90].map(n =>
+        `<button type="button" data-span="${n}" aria-pressed="${span === n}">Last ${n} days</button>`).join('')}</div>
+      <div class="tiles">
+        <div class="tile"><span class="tile__label">Visitors</span><strong class="tile__value">${count(totals.visitors)}</strong>${change(totals.visitors, previous.visitors, span)}</div>
+        <div class="tile"><span class="tile__label">Page views</span><strong class="tile__value">${count(totals.views)}</strong>${change(totals.views, previous.views, span)}</div>
+        <div class="tile"><span class="tile__label">Orders</span><strong class="tile__value">${count(totals.orders)}</strong>${change(totals.orders, previous.orders, span)}</div>
+        <div class="tile"><span class="tile__label">Orders per 100 visitors</span><strong class="tile__value">${rate}</strong>
+          <span class="tile__note">${totals.orders && totals.visitors >= totals.orders ? `About 1 order for every ${count(totals.visitors / totals.orders)} visitors` : 'How many visits turn into orders'}</span></div>
+      </div>
+      <section class="panel">
+        <h2>Visitors per day</h2>
+        <p class="field__hint">${totals.visitors ? `Busiest day: ${dayLabel(busiest.day, true)}, with ${count(busiest.visitors)} visitor${busiest.visitors === 1 ? '' : 's'}.` : 'No visits counted in this period yet. Counting started when this page was added.'}</p>
+        <div class="chart" tabindex="0" role="img" aria-label="Bar chart of visitors per day from ${dayLabel(days[0].day)} to today. Use the left and right arrow keys to read each day, or open the table below the chart.">
+          <div class="chart__plot">
+            <div class="chart__grid" aria-hidden="true">${[0, ceiling / 2, ceiling].map(tick => `<span data-var="--at:${tick / ceiling * 100}%"><b>${count(tick)}</b></span>`).join('')}</div>
+            <div class="chart__bars${days.length > 40 ? ' chart__bars--dense' : ''}">${days.map((day, index) =>
+              `<span class="chart__col" data-i="${index}"><span class="chart__bar${day.visitors ? '' : ' is-zero'}" data-var="--h:${(day.visitors / ceiling * 100).toFixed(2)}%"></span></span>`).join('')}</div>
+            <div class="chart__tip" hidden></div>
+          </div>
+          <div class="chart__axis" aria-hidden="true"><span>${dayLabel(days[0].day)}</span><span>${dayLabel(days[Math.floor(days.length / 2)].day)}</span><span>Today</span></div>
+        </div>
+        <details class="chart__table"><summary>See as a table</summary>
+          <div class="table-scroll"><table><thead><tr><th scope="col">Day</th><th scope="col">Visitors</th><th scope="col">Page views</th><th scope="col">Orders</th></tr></thead>
+          <tbody>${[...days].reverse().map(day => `<tr><th scope="row">${dayLabel(day.day, true)}</th><td>${count(day.visitors)}</td><td>${count(day.views)}</td><td>${count(day.orders)}</td></tr>`).join('')}</tbody></table></div>
+        </details>
+      </section>
+      <div class="cols cols--even">
+        ${ranked('Most viewed products', report.products,
+          row => row.name ? `<a class="textlink" href="#/products/${encodeURIComponent(row.key)}">${esc(row.name)}</a>` : `${esc(row.key)} <small>(deleted)</small>`,
+          row => count(row.count), 'No product pages viewed yet.')}
+        ${ranked('Pages', report.pages, row => esc(PAGE_NAMES[row.key] || row.key), row => count(row.count), 'No page views yet.')}
+        ${ranked('Where visitors came from', report.sources,
+          row => esc(row.key === 'Direct' ? 'Typed the address or a saved link' : row.key === 'Other' ? 'Other sites' : row.key),
+          row => count(row.count), 'Once people arrive from Instagram, WhatsApp, Google and so on, they show here.')}
+        ${ranked('Phone or computer', report.devices, row => esc(row.key), row => Math.round(row.count / devices * 100) + '%', 'Shows once visitors arrive.')}
+      </div>
+      <p class="field__hint visitors__note">A visitor is counted once a day, so someone who comes back on three days counts three times. Visitors whose browser asks not to be tracked aren't counted.
+        Tip: share links with <strong>?src=</strong> on the end, like glossygemzbyzee.com/?src=instagram for your Instagram bio, and those visits are named here.</p>`;
+
+    /* The security policy forbids inline style attributes, so sizes are set through the DOM. */
+    for (const el of $$('[data-var]', view)) { const [name, value] = el.dataset.var.split(':'); el.style.setProperty(name, value); }
+    for (const button of $$('[data-span]', view)) button.addEventListener('click', () => { state.span = Number(button.dataset.span); visitorsView(view); });
+
+    /* Hover, touch or the arrow keys show one day's numbers. The table holds the same figures. */
+    const chart = $('.chart', view);
+    const plot = $('.chart__plot', chart);
+    const tip = $('.chart__tip', chart);
+    const cols = $$('.chart__col', chart);
+    let current = -1;
+    const show = index => {
+      if (index < 0 || index >= days.length) return;
+      cols[current]?.classList.remove('is-on');
+      current = index;
+      cols[index].classList.add('is-on');
+      const day = days[index];
+      const strong = document.createElement('strong');
+      strong.textContent = `${count(day.visitors)} visitor${day.visitors === 1 ? '' : 's'}`;
+      const date = document.createElement('span');
+      date.textContent = index === days.length - 1 ? 'Today' : dayLabel(day.day, true);
+      const more = document.createElement('span');
+      more.textContent = `${count(day.views)} page view${day.views === 1 ? '' : 's'} · ${count(day.orders)} order${day.orders === 1 ? '' : 's'}`;
+      tip.replaceChildren(strong, date, more);
+      tip.hidden = false;
+      const box = plot.getBoundingClientRect();
+      const col = cols[index].getBoundingClientRect();
+      const x = col.left - box.left + col.width / 2;
+      tip.style.left = Math.min(Math.max(x, tip.offsetWidth / 2), box.width - tip.offsetWidth / 2) + 'px';
+    };
+    const hide = () => { tip.hidden = true; cols[current]?.classList.remove('is-on'); current = -1; };
+    const at = event => {
+      const box = $('.chart__bars', chart).getBoundingClientRect();
+      return Math.floor((event.clientX - box.left) / box.width * days.length);
+    };
+    plot.addEventListener('pointermove', event => show(at(event)));
+    plot.addEventListener('pointerdown', event => show(at(event)));
+    plot.addEventListener('pointerleave', event => { if (event.pointerType === 'mouse') hide(); });
+    chart.addEventListener('blur', hide);
+    chart.addEventListener('keydown', event => {
+      const moves = { ArrowLeft: -1, ArrowRight: 1 };
+      if (event.key in moves) show(current < 0 ? days.length - 1 : Math.min(Math.max(current + moves[event.key], 0), days.length - 1));
+      else if (event.key === 'Home') show(0);
+      else if (event.key === 'End') show(days.length - 1);
+      else if (event.key === 'Escape') hide();
+      else return;
+      event.preventDefault();
+    });
+  }
+
   /* ---------- blog ---------- */
   const shortDate = iso => iso ? new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Africa/Lagos' }).format(new Date(iso)) : '';
 
