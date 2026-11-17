@@ -1,0 +1,14 @@
+node_modules/
+.netlify/
+.env
+.owner-setup-code.txt
+.impeccable/review/
+deno.lock
+
+# Reference screenshots of other sites: kept locally, not published
+inspo/
+
+# Design tool scratch files
+.impeccable/serve.log
+.impeccable/hook.cache.json
+.impeccable/questions/

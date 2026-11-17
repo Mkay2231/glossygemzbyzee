@@ -1,0 +1,719 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-16T12:38:40.846Z",
+  "title": "Design System: Glossy Gems by Zee",
+  "extensions": {
+    "colorMeta": {
+      "plum-950": {
+        "role": "primary",
+        "displayName": "Night Plum",
+        "canonical": "#1c0620",
+        "oklch": "oklch(17.6% 0.059 321.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.059 321.4)",
+          "oklch(26.0% 0.059 321.4)",
+          "oklch(38.0% 0.059 321.4)",
+          "oklch(50.0% 0.059 321.4)",
+          "oklch(62.0% 0.059 321.4)",
+          "oklch(74.0% 0.059 321.4)",
+          "oklch(85.0% 0.059 321.4)",
+          "oklch(95.0% 0.039 321.4)"
+        ]
+      },
+      "plum-900": {
+        "role": "primary",
+        "displayName": "Satin Plum",
+        "canonical": "#2c0a31",
+        "oklch": "oklch(22.4% 0.081 322.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.069 322.3)",
+          "oklch(26.0% 0.081 322.3)",
+          "oklch(38.0% 0.081 322.3)",
+          "oklch(50.0% 0.081 322.3)",
+          "oklch(62.0% 0.081 322.3)",
+          "oklch(74.0% 0.081 322.3)",
+          "oklch(85.0% 0.081 322.3)",
+          "oklch(95.0% 0.041 322.3)"
+        ]
+      },
+      "plum": {
+        "role": "primary",
+        "displayName": "Logo Plum",
+        "canonical": "#690365",
+        "oklch": "oklch(36.4% 0.163 330.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.067 330.3)",
+          "oklch(26.0% 0.115 330.3)",
+          "oklch(38.0% 0.163 330.3)",
+          "oklch(50.0% 0.163 330.3)",
+          "oklch(62.0% 0.163 330.3)",
+          "oklch(74.0% 0.163 330.3)",
+          "oklch(85.0% 0.131 330.3)",
+          "oklch(95.0% 0.039 330.3)"
+        ]
+      },
+      "orchid": {
+        "role": "primary",
+        "displayName": "Orchid",
+        "canonical": "#ae0093",
+        "oklch": "oklch(51.1% 0.225 337.2)",
+        "tonalRamp": [
+          "oklch(15.0% 0.065 337.2)",
+          "oklch(26.0% 0.113 337.2)",
+          "oklch(38.0% 0.165 337.2)",
+          "oklch(50.0% 0.217 337.2)",
+          "oklch(62.0% 0.225 337.2)",
+          "oklch(74.0% 0.225 337.2)",
+          "oklch(85.0% 0.113 337.2)",
+          "oklch(95.0% 0.033 337.2)"
+        ]
+      },
+      "pink": {
+        "role": "tertiary",
+        "displayName": "Flyer Pink",
+        "canonical": "#fdadee",
+        "oklch": "oklch(84.4% 0.124 333.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.064 333.5)",
+          "oklch(26.0% 0.116 333.5)",
+          "oklch(38.0% 0.124 333.5)",
+          "oklch(50.0% 0.124 333.5)",
+          "oklch(62.0% 0.124 333.5)",
+          "oklch(74.0% 0.124 333.5)",
+          "oklch(85.0% 0.124 333.5)",
+          "oklch(95.0% 0.036 333.5)"
+        ]
+      },
+      "blush": {
+        "role": "neutral",
+        "displayName": "Blush",
+        "canonical": "#fdeeff",
+        "oklch": "oklch(96.6% 0.027 322.2)",
+        "tonalRamp": [
+          "oklch(15.0% 0.027 322.2)",
+          "oklch(26.0% 0.027 322.2)",
+          "oklch(38.0% 0.027 322.2)",
+          "oklch(50.0% 0.027 322.2)",
+          "oklch(62.0% 0.027 322.2)",
+          "oklch(74.0% 0.027 322.2)",
+          "oklch(85.0% 0.027 322.2)",
+          "oklch(95.0% 0.027 322.2)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "canonical": "#fffaff",
+        "oklch": "oklch(99.0% 0.008 325.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.008 325.6)",
+          "oklch(26.0% 0.008 325.6)",
+          "oklch(38.0% 0.008 325.6)",
+          "oklch(50.0% 0.008 325.6)",
+          "oklch(62.0% 0.008 325.6)",
+          "oklch(74.0% 0.008 325.6)",
+          "oklch(85.0% 0.008 325.6)",
+          "oklch(95.0% 0.008 325.6)"
+        ]
+      },
+      "gold": {
+        "role": "secondary",
+        "displayName": "Logo Gold",
+        "canonical": "#f1c729",
+        "oklch": "oklch(84.2% 0.164 92.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.028 92.4)",
+          "oklch(26.0% 0.052 92.4)",
+          "oklch(38.0% 0.076 92.4)",
+          "oklch(50.0% 0.100 92.4)",
+          "oklch(62.0% 0.124 92.4)",
+          "oklch(74.0% 0.148 92.4)",
+          "oklch(85.0% 0.164 92.4)",
+          "oklch(95.0% 0.068 92.4)"
+        ]
+      },
+      "ring": {
+        "role": "secondary",
+        "displayName": "Ring Gold",
+        "canonical": "#f5cc7e",
+        "oklch": "oklch(86.4% 0.107 82.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.031 82.6)",
+          "oklch(26.0% 0.051 82.6)",
+          "oklch(38.0% 0.075 82.6)",
+          "oklch(50.0% 0.099 82.6)",
+          "oklch(62.0% 0.107 82.6)",
+          "oklch(74.0% 0.107 82.6)",
+          "oklch(85.0% 0.107 82.6)",
+          "oklch(95.0% 0.047 82.6)"
+        ]
+      },
+      "ring-deep": {
+        "role": "secondary",
+        "displayName": "Deep Ring Gold",
+        "canonical": "#b98a1e",
+        "oklch": "oklch(66.2% 0.128 82.5)",
+        "tonalRamp": [
+          "oklch(15.0% 0.028 82.5)",
+          "oklch(26.0% 0.052 82.5)",
+          "oklch(38.0% 0.076 82.5)",
+          "oklch(50.0% 0.100 82.5)",
+          "oklch(62.0% 0.124 82.5)",
+          "oklch(74.0% 0.128 82.5)",
+          "oklch(85.0% 0.128 82.5)",
+          "oklch(95.0% 0.048 82.5)"
+        ]
+      },
+      "charcoal": {
+        "role": "tertiary",
+        "displayName": "Charcoal",
+        "canonical": "#2a3135",
+        "oklch": "oklch(30.8% 0.012 232.8)",
+        "tonalRamp": [
+          "oklch(15.0% 0.012 232.8)",
+          "oklch(26.0% 0.012 232.8)",
+          "oklch(38.0% 0.012 232.8)",
+          "oklch(50.0% 0.012 232.8)",
+          "oklch(62.0% 0.012 232.8)",
+          "oklch(74.0% 0.012 232.8)",
+          "oklch(85.0% 0.012 232.8)",
+          "oklch(95.0% 0.012 232.8)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#2a0f2e",
+        "oklch": "oklch(22.6% 0.067 322.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.067 322.3)",
+          "oklch(26.0% 0.067 322.3)",
+          "oklch(38.0% 0.067 322.3)",
+          "oklch(50.0% 0.067 322.3)",
+          "oklch(62.0% 0.067 322.3)",
+          "oklch(74.0% 0.067 322.3)",
+          "oklch(85.0% 0.067 322.3)",
+          "oklch(95.0% 0.039 322.3)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Plum",
+        "canonical": "#6d4d72",
+        "oklch": "oklch(46.9% 0.070 321.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.070 321.9)",
+          "oklch(26.0% 0.070 321.9)",
+          "oklch(38.0% 0.070 321.9)",
+          "oklch(50.0% 0.070 321.9)",
+          "oklch(62.0% 0.070 321.9)",
+          "oklch(74.0% 0.070 321.9)",
+          "oklch(85.0% 0.070 321.9)",
+          "oklch(95.0% 0.038 321.9)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#ecd3ee",
+        "oklch": "oklch(89.5% 0.045 323.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.045 323.7)",
+          "oklch(26.0% 0.045 323.7)",
+          "oklch(38.0% 0.045 323.7)",
+          "oklch(50.0% 0.045 323.7)",
+          "oklch(62.0% 0.045 323.7)",
+          "oklch(74.0% 0.045 323.7)",
+          "oklch(85.0% 0.045 323.7)",
+          "oklch(95.0% 0.041 323.7)"
+        ]
+      },
+      "danger": {
+        "role": "neutral",
+        "displayName": "Danger",
+        "canonical": "#a3123f",
+        "oklch": "oklch(46.4% 0.175 11.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.059 11.6)",
+          "oklch(26.0% 0.103 11.6)",
+          "oklch(38.0% 0.151 11.6)",
+          "oklch(50.0% 0.175 11.6)",
+          "oklch(62.0% 0.175 11.6)",
+          "oklch(74.0% 0.159 11.6)",
+          "oklch(85.0% 0.083 11.6)",
+          "oklch(95.0% 0.023 11.6)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "canonical": "#ffffff",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "oklch(15.0% 0.000 89.9)",
+          "oklch(26.0% 0.000 89.9)",
+          "oklch(38.0% 0.000 89.9)",
+          "oklch(50.0% 0.000 89.9)",
+          "oklch(62.0% 0.000 89.9)",
+          "oklch(74.0% 0.000 89.9)",
+          "oklch(85.0% 0.000 89.9)",
+          "oklch(95.0% 0.000 89.9)"
+        ]
+      },
+      "field-line": {
+        "role": "neutral",
+        "displayName": "Field Line",
+        "canonical": "#cfaed3",
+        "oklch": "oklch(79.1% 0.063 322.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.063 322.7)",
+          "oklch(26.0% 0.063 322.7)",
+          "oklch(38.0% 0.063 322.7)",
+          "oklch(50.0% 0.063 322.7)",
+          "oklch(62.0% 0.063 322.7)",
+          "oklch(74.0% 0.063 322.7)",
+          "oklch(85.0% 0.063 322.7)",
+          "oklch(95.0% 0.039 322.7)"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#4a2c4f",
+        "oklch": "oklch(34.5% 0.070 321.7)",
+        "tonalRamp": [
+          "oklch(15.0% 0.070 321.7)",
+          "oklch(26.0% 0.070 321.7)",
+          "oklch(38.0% 0.070 321.7)",
+          "oklch(50.0% 0.070 321.7)",
+          "oklch(62.0% 0.070 321.7)",
+          "oklch(74.0% 0.070 321.7)",
+          "oklch(85.0% 0.070 321.7)",
+          "oklch(95.0% 0.038 321.7)"
+        ]
+      },
+      "on-pink": {
+        "role": "neutral",
+        "displayName": "On-Pink",
+        "canonical": "#4d1f52",
+        "oklch": "oklch(32.9% 0.101 323.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.069 323.6)",
+          "oklch(26.0% 0.101 323.6)",
+          "oklch(38.0% 0.101 323.6)",
+          "oklch(50.0% 0.101 323.6)",
+          "oklch(62.0% 0.101 323.6)",
+          "oklch(74.0% 0.101 323.6)",
+          "oklch(85.0% 0.101 323.6)",
+          "oklch(95.0% 0.041 323.6)"
+        ]
+      },
+      "on-dark-soft": {
+        "role": "neutral",
+        "displayName": "Soft On-Dark",
+        "canonical": "#f3dcf4",
+        "oklch": "oklch(92.0% 0.040 324.6)",
+        "tonalRamp": [
+          "oklch(15.0% 0.040 324.6)",
+          "oklch(26.0% 0.040 324.6)",
+          "oklch(38.0% 0.040 324.6)",
+          "oklch(50.0% 0.040 324.6)",
+          "oklch(62.0% 0.040 324.6)",
+          "oklch(74.0% 0.040 324.6)",
+          "oklch(85.0% 0.040 324.6)",
+          "oklch(95.0% 0.040 324.6)"
+        ]
+      },
+      "plum-glow": {
+        "role": "primary",
+        "displayName": "Plum Glow",
+        "canonical": "#7d0b78",
+        "oklch": "oklch(41.5% 0.181 330.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.069 330.4)",
+          "oklch(26.0% 0.117 330.4)",
+          "oklch(38.0% 0.173 330.4)",
+          "oklch(50.0% 0.181 330.4)",
+          "oklch(62.0% 0.181 330.4)",
+          "oklch(74.0% 0.181 330.4)",
+          "oklch(85.0% 0.129 330.4)",
+          "oklch(95.0% 0.037 330.4)"
+        ]
+      },
+      "gold-hover": {
+        "role": "secondary",
+        "displayName": "Gold Hover",
+        "canonical": "#ffdf5c",
+        "oklch": "oklch(90.7% 0.151 95.4)",
+        "tonalRamp": [
+          "oklch(15.0% 0.031 95.4)",
+          "oklch(26.0% 0.051 95.4)",
+          "oklch(38.0% 0.075 95.4)",
+          "oklch(50.0% 0.099 95.4)",
+          "oklch(62.0% 0.127 95.4)",
+          "oklch(74.0% 0.151 95.4)",
+          "oklch(85.0% 0.151 95.4)",
+          "oklch(95.0% 0.079 95.4)"
+        ]
+      },
+      "admin-ground": {
+        "role": "neutral",
+        "displayName": "Lilac Ground",
+        "canonical": "#faf4fb",
+        "oklch": "oklch(97.4% 0.011 321.3)",
+        "tonalRamp": [
+          "oklch(15.0% 0.011 321.3)",
+          "oklch(26.0% 0.011 321.3)",
+          "oklch(38.0% 0.011 321.3)",
+          "oklch(50.0% 0.011 321.3)",
+          "oklch(62.0% 0.011 321.3)",
+          "oklch(74.0% 0.011 321.3)",
+          "oklch(85.0% 0.011 321.3)",
+          "oklch(95.0% 0.011 321.3)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The home hero headline only."
+      },
+      "page-title": {
+        "displayName": "Page title",
+        "purpose": "h1 on page heads, product, checkout and confirmation screens."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section h2; one phrase may turn italic at weight 400."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Set names, category names, legends, panel headings."
+      },
+      "note": {
+        "displayName": "Note",
+        "purpose": "Italic serif for a person’s words: gift notes, the footer tagline."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "The paragraph under a headline, max 28 to 30em."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Default text; 1rem on phones and in the dashboard. Tabular numerals."
+      },
+      "item-name": {
+        "displayName": "Item name",
+        "purpose": "Product names on cards; 500 is the emphasis weight."
+      },
+      "meta": {
+        "displayName": "Meta",
+        "purpose": "Types, counts, hints, breadcrumbs, row sub-lines."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Uppercase group headings: footer columns, filter rail, table heads. Never a kicker."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Order references and account numbers, in the text face so every character reads."
+      }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 18px 40px -22px rgb(44 10 49 / 0.45)",
+        "purpose": "Toast and the opened mobile menu (--shadow)."
+      },
+      {
+        "name": "drawer",
+        "value": "-30px 0 60px -30px rgb(28 6 32 / 0.55)",
+        "purpose": "Bag drawer over a plum-950 backdrop at 50%."
+      },
+      {
+        "name": "seal",
+        "value": "0 14px 30px -12px rgb(0 0 0 / 0.6)",
+        "purpose": "Gold sale seal over the hero portrait."
+      },
+      {
+        "name": "save-bar",
+        "value": "0 -10px 30px -18px rgb(44 10 49 / 0.35)",
+        "purpose": "Sticky save bar in the dashboard."
+      },
+      {
+        "name": "field-focus",
+        "value": "0 0 0 3px rgb(174 0 147 / 0.18)",
+        "purpose": "Orchid halo on focused inputs, with a plum border."
+      }
+    ],
+    "motion": [
+      {
+        "name": "out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The only easing curve (--out): every transition and entrance."
+      },
+      {
+        "name": "control",
+        "value": "0.2s to 0.25s",
+        "purpose": "Buttons, chips, fields, nav and hover fills."
+      },
+      {
+        "name": "image",
+        "value": "0.5s to 0.8s",
+        "purpose": "Image scale on card hover, ring lift."
+      },
+      {
+        "name": "drawer",
+        "value": "0.5s slide, 0.4s backdrop fade",
+        "purpose": "Bag drawer entrance."
+      },
+      {
+        "name": "settle",
+        "value": "1.1s, staggered 0.12s",
+        "purpose": "Hero rings and seal fade in from 94% scale."
+      },
+      {
+        "name": "orbit",
+        "value": "140s linear infinite",
+        "purpose": "Gold dust circling the hero portrait."
+      },
+      {
+        "name": "bump",
+        "value": "0.5s, scale to 1.45",
+        "purpose": "Count badge when the bag or saved count changes."
+      },
+      {
+        "name": "breathe",
+        "value": "1.6s ease-in-out infinite",
+        "purpose": "Loading placeholder cards."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "durations 0.01ms, one iteration",
+        "purpose": "prefers-reduced-motion switches all animation and transition off."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "nav-collapse",
+        "value": "1120px"
+      },
+      {
+        "name": "single-column",
+        "value": "900px"
+      },
+      {
+        "name": "phone",
+        "value": "640px"
+      }
+    ],
+    "gradients": [
+      {
+        "name": "satin-hero",
+        "value": "linear-gradient(118deg, transparent 38%, rgb(253 173 238 / 0.09) 47%, transparent 58%), radial-gradient(90% 120% at 88% -10%, #ae0093 0%, transparent 58%), radial-gradient(70% 90% at -5% 110%, #7d0b78 0%, transparent 62%), #2c0a31",
+        "purpose": "Home hero field."
+      },
+      {
+        "name": "satin-band",
+        "value": "linear-gradient(118deg, transparent 30%, rgb(253 173 238 / 0.08) 42%, transparent 55%), radial-gradient(80% 130% at 0% 0%, #ae0093 0%, transparent 60%), #2c0a31",
+        "purpose": "Gift band."
+      },
+      {
+        "name": "satin-box",
+        "value": "radial-gradient(120% 90% at 100% 0%, #ae0093 0%, transparent 60%), #2c0a31",
+        "purpose": "Gift box."
+      }
+    ],
+    "statusTints": [
+      {
+        "name": "new",
+        "background": "#fde4f8",
+        "text": "#8a0075"
+      },
+      {
+        "name": "paid",
+        "background": "#fdf0c2",
+        "text": "#5c4300"
+      },
+      {
+        "name": "shipped",
+        "background": "#e3effb",
+        "text": "#1d4a7a"
+      },
+      {
+        "name": "delivered / live",
+        "background": "#e2f4e8",
+        "text": "#1e5a34"
+      },
+      {
+        "name": "cancelled / draft",
+        "background": "#eeeaf0",
+        "text": "#5b5560"
+      },
+      {
+        "name": "out of stock",
+        "background": "#ffe6ec",
+        "text": "#8a1238"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main action on paper, blush and white grounds.",
+      "html": "<button class=\"ds-btn-primary\" type=\"button\">Add to bag</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 12px 26px; border: 1.5px solid transparent; border-radius: 999px; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); font-weight: 500; font-size: 1rem; line-height: 1.2; cursor: pointer; transition: background-color .25s cubic-bezier(0.16,1,0.3,1), color .25s cubic-bezier(0.16,1,0.3,1), border-color .25s cubic-bezier(0.16,1,0.3,1), transform .25s cubic-bezier(0.16,1,0.3,1); background: var(--plum, #690365); color: #fff; } .ds-btn-primary:hover { background: var(--orchid, #ae0093); } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: 2px solid var(--orchid, #ae0093); outline-offset: 3px; }"
+    },
+    {
+      "name": "Gold Button",
+      "kind": "button",
+      "refersTo": "button-gold",
+      "description": "The main action on a satin plum field. Never used on light grounds.",
+      "html": "<div class=\"ds-gold-field\"><button class=\"ds-btn-gold\" type=\"button\">Shop all jewelry</button></div>",
+      "css": ".ds-gold-field { padding: 28px; border-radius: 24px; background: radial-gradient(90% 120% at 100% 0%, #ae0093 0%, transparent 60%), var(--plum-900, #2c0a31); } .ds-btn-gold { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 12px 26px; border: 1.5px solid transparent; border-radius: 999px; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); font-weight: 500; font-size: 1rem; line-height: 1.2; cursor: pointer; transition: background-color .25s cubic-bezier(0.16,1,0.3,1), color .25s cubic-bezier(0.16,1,0.3,1), border-color .25s cubic-bezier(0.16,1,0.3,1), transform .25s cubic-bezier(0.16,1,0.3,1); background: var(--gold, #f1c729); color: var(--plum-950, #1c0620); } .ds-btn-gold:hover { background: #ffdf5c; } .ds-btn-gold:active { transform: scale(0.98); } .ds-btn-gold:focus-visible { outline: 2px solid var(--gold, #f1c729); outline-offset: 3px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "The secondary action beside a primary or gold button; outline in the current text colour.",
+      "html": "<button class=\"ds-btn-ghost\" type=\"button\">Keep shopping</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 12px 26px; border: 1.5px solid transparent; border-radius: 999px; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); font-weight: 500; font-size: 1rem; line-height: 1.2; cursor: pointer; transition: background-color .25s cubic-bezier(0.16,1,0.3,1), color .25s cubic-bezier(0.16,1,0.3,1), border-color .25s cubic-bezier(0.16,1,0.3,1), transform .25s cubic-bezier(0.16,1,0.3,1); border-color: currentColor; background: transparent; color: var(--ink, #2a0f2e); } .ds-btn-ghost:hover { background: var(--plum, #690365); border-color: var(--plum, #690365); color: #fff; } .ds-btn-ghost:active { transform: scale(0.98); } .ds-btn-ghost:focus-visible { outline: 2px solid var(--orchid, #ae0093); outline-offset: 3px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Label above, white field with a field-line border, hint below.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-field-name\">Full name</label><input id=\"ds-field-name\" type=\"text\" placeholder=\"Ada Obi\"><p class=\"ds-field-hint\">As it should appear on the parcel.</p></div>",
+      "css": ".ds-field { font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); color: var(--ink, #2a0f2e); max-width: 360px; } .ds-field label { display: block; margin-bottom: 8px; font-weight: 500; } .ds-field input { width: 100%; padding: 12px 16px; border: 1px solid #cfaed3; border-radius: 12px; background: #fff; font: inherit; color: inherit; transition: border-color .2s cubic-bezier(0.16,1,0.3,1), box-shadow .2s cubic-bezier(0.16,1,0.3,1); } .ds-field input::placeholder { color: #7a5e7e; } .ds-field input:hover { border-color: var(--plum, #690365); } .ds-field input:focus { outline: 0; border-color: var(--plum, #690365); box-shadow: 0 0 0 3px rgb(174 0 147 / 0.18); } .ds-field-hint { margin: 6px 0 0; color: var(--muted, #6d4d72); font-size: 0.9375rem; }"
+    },
+    {
+      "name": "Filter Chips",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Toggle filters with a count; selected fills plum.",
+      "html": "<div class=\"ds-chips\"><button class=\"ds-chip\" type=\"button\" aria-pressed=\"true\">Needs action <span>6</span></button><button class=\"ds-chip\" type=\"button\" aria-pressed=\"false\">New <span>3</span></button><button class=\"ds-chip\" type=\"button\" aria-pressed=\"false\">Paid <span>3</span></button></div>",
+      "css": ".ds-chips { display: flex; flex-wrap: wrap; gap: 8px; } .ds-chip { padding: 8px 14px; border: 1px solid #cfaed3; border-radius: 999px; background: #fff; color: var(--ink, #2a0f2e); font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); font-size: 1rem; cursor: pointer; transition: all .2s cubic-bezier(0.16,1,0.3,1); } .ds-chip span { margin-left: 4px; opacity: 0.7; } .ds-chip:hover { border-color: var(--plum, #690365); } .ds-chip[aria-pressed=\"true\"] { border-color: var(--plum, #690365); background: var(--plum, #690365); color: #fff; } .ds-chip:focus-visible { outline: 2px solid var(--orchid, #ae0093); outline-offset: 3px; }"
+    },
+    {
+      "name": "Status Pills",
+      "kind": "chip",
+      "refersTo": "status-pill",
+      "description": "Order and product state in the dashboard: always a word on a tint, never colour alone.",
+      "html": "<div class=\"ds-pills\"><span class=\"ds-pill ds-pill-new\">New</span><span class=\"ds-pill ds-pill-paid\">Paid</span><span class=\"ds-pill ds-pill-shipped\">Shipped</span><span class=\"ds-pill ds-pill-delivered\">Delivered</span><span class=\"ds-pill ds-pill-cancelled\">Cancelled</span><span class=\"ds-pill ds-pill-out\">Out of stock</span></div>",
+      "css": ".ds-pills { display: flex; flex-wrap: wrap; gap: 8px; } .ds-pill { padding: 4px 11px; border-radius: 999px; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); font-size: 0.875rem; font-weight: 500; white-space: nowrap; } .ds-pill-new { background: #fde4f8; color: #8a0075; } .ds-pill-paid { background: #fdf0c2; color: #5c4300; } .ds-pill-shipped { background: #e3effb; color: #1d4a7a; } .ds-pill-delivered { background: #e2f4e8; color: #1e5a34; } .ds-pill-cancelled { background: #eeeaf0; color: #5b5560; } .ds-pill-out { background: #ffe6ec; color: #8a1238; }"
+    },
+    {
+      "name": "Product Card",
+      "kind": "card",
+      "refersTo": "product-card-media",
+      "description": "No container: a full square image over type, name, price and a round add button.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-media\"><div class=\"ds-card-img\"></div></div><p class=\"ds-card-type\">Earrings</p><p class=\"ds-card-name\">Sculpted Hoops</p><div class=\"ds-card-foot\"><span class=\"ds-card-price\">&#8358;12,500</span><button class=\"ds-card-add\" type=\"button\" aria-label=\"Add Sculpted Hoops to bag\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M12 5v14M5 12h14\"/></svg></button></div></article>",
+      "css": ".ds-card { width: 240px; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); color: var(--ink, #2a0f2e); } .ds-card-media { overflow: hidden; border-radius: var(--radius, 18px); background: var(--blush, #fdeeff); aspect-ratio: 1; } .ds-card-img { width: 100%; height: 100%; background: radial-gradient(60% 60% at 40% 35%, #f5cc7e 0%, #d9b98c 45%, #b89a78 100%); transition: scale .8s cubic-bezier(0.16,1,0.3,1); } .ds-card:hover .ds-card-img { scale: 1.05; } .ds-card-type { margin: 16px 4px 0; color: var(--muted, #6d4d72); font-size: 0.875rem; } .ds-card-name { margin: 0 4px; font-weight: 500; font-size: 1.1875rem; line-height: 1.25; } .ds-card-foot { display: flex; align-items: center; justify-content: space-between; margin: 8px 4px 0; min-height: 44px; } .ds-card-price { font-weight: 500; font-size: 1.0625rem; font-variant-numeric: tabular-nums; } .ds-card-add { display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--plum, #690365); color: #fff; cursor: pointer; transition: background-color .25s cubic-bezier(0.16,1,0.3,1), transform .25s cubic-bezier(0.16,1,0.3,1); } .ds-card-add:hover { background: var(--orchid, #ae0093); transform: scale(1.08); } .ds-card-add:focus-visible { outline: 2px solid var(--orchid, #ae0093); outline-offset: 3px; }"
+    },
+    {
+      "name": "The Ring",
+      "kind": "custom",
+      "refersTo": "ring",
+      "description": "Signature frame for people and groupings: a 1.5px gold line with a padded gap around a circular photo, with a small ring overlapping.",
+      "html": "<div class=\"ds-ring-field\"><div class=\"ds-ring-art\"><span class=\"ds-ring ds-ring-lg\"><span class=\"ds-ring-photo\"></span></span><span class=\"ds-ring ds-ring-sm\"><span class=\"ds-ring-photo ds-ring-photo-b\"></span></span></div></div>",
+      "css": ".ds-ring-field { padding: 32px; border-radius: 24px; background: radial-gradient(90% 120% at 100% 0%, #ae0093 0%, transparent 60%), var(--plum-900, #2c0a31); } .ds-ring-art { position: relative; width: 220px; aspect-ratio: 1; margin-inline: auto; } .ds-ring { display: block; padding: 9px; border: 1.5px solid var(--ring, #f5cc7e); border-radius: 50%; transition: transform .5s cubic-bezier(0.16,1,0.3,1), border-color .3s cubic-bezier(0.16,1,0.3,1); } .ds-ring-lg { position: absolute; inset: 0; padding: 14px; border-width: 2px; } .ds-ring-sm { position: absolute; left: -7%; bottom: -3%; width: 36%; padding: 7px; background: var(--plum-900, #2c0a31); } .ds-ring-photo { display: block; width: 100%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(70% 70% at 40% 30%, #c98d5e 0%, #7a4a2c 55%, #3c2416 100%); } .ds-ring-photo-b { background: radial-gradient(60% 60% at 50% 45%, #fff6e6 0%, #d9c3a0 60%, #b79f7c 100%); } .ds-ring-art:hover .ds-ring-lg { transform: translateY(-6px); }"
+    },
+    {
+      "name": "Storefront Navigation",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Italic serif wordmark with a spaced uppercase line, Jost links, and a deep-ring underline on the current page.",
+      "html": "<div class=\"ds-nav-bar\"><span class=\"ds-nav-brand\">Glossy Gems<small>by Zee</small></span><nav class=\"ds-nav\"><a href=\"#\" aria-current=\"page\">All jewelry</a><a href=\"#\">Earrings</a><a href=\"#\">Necklaces</a><a href=\"#\">Gift Builder</a></nav></div>",
+      "css": ".ds-nav-bar { display: flex; align-items: center; gap: 28px; min-height: 76px; padding-inline: 20px; background: var(--paper, #fffaff); border-bottom: 1px solid var(--line, #ecd3ee); } .ds-nav-brand { font-family: var(--serif, 'Bodoni Moda', 'Didot', 'Bodoni 72', Georgia, serif); font-style: italic; font-weight: 600; font-size: 1.625rem; line-height: 1; letter-spacing: -0.01em; color: var(--plum, #690365); white-space: nowrap; } .ds-nav-brand small { display: block; margin-top: 5px; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); font-style: normal; font-weight: 500; font-size: 0.6875rem; letter-spacing: 0.34em; text-transform: uppercase; color: var(--ink, #2a0f2e); } .ds-nav { display: flex; gap: 22px; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); font-size: 1rem; } .ds-nav a { padding-block: 8px; border-bottom: 1.5px solid transparent; color: var(--ink, #2a0f2e); text-decoration: none; white-space: nowrap; transition: border-color .2s cubic-bezier(0.16,1,0.3,1), color .2s cubic-bezier(0.16,1,0.3,1); } .ds-nav a:hover { color: var(--orchid, #ae0093); } .ds-nav a[aria-current] { border-color: var(--ring-deep, #b98a1e); color: var(--plum, #690365); font-weight: 500; } .ds-nav a:focus-visible { outline: 2px solid var(--orchid, #ae0093); outline-offset: 3px; border-radius: 4px; }"
+    },
+    {
+      "name": "Dashboard Rail",
+      "kind": "nav",
+      "refersTo": "admin-nav-item",
+      "description": "Flat satin plum rail in the owner dashboard; the current section is the only gold.",
+      "html": "<nav class=\"ds-rail\"><a href=\"#\" aria-current=\"page\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 8h14v12H5zM9 8V6a3 3 0 0 1 6 0v2\"/></svg><span>Orders</span><span class=\"ds-rail-badge\">3</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 4.500v9L12 21l-8-4.500v-9L12 3Zm0 9l8-4.500M12 12v9M12 12L4 7.500\"/></svg><span>Products</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 7h10M18 7h2M4 12h4M12 12h8M4 17h12M20 17h0\"/><circle cx=\"16\" cy=\"7\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/></svg><span>Settings</span></a></nav>",
+      "css": ".ds-rail { display: flex; flex-direction: column; gap: 6px; width: 232px; padding: 22px 16px; border-radius: 16px; background: var(--plum-900, #2c0a31); color: #f3dcf4; font-family: var(--sans, 'Jost', 'Century Gothic', 'Avenir Next', system-ui, sans-serif); } .ds-rail a { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 12px; color: inherit; font-size: 1.0625rem; text-decoration: none; transition: background-color .2s cubic-bezier(0.16,1,0.3,1), color .2s cubic-bezier(0.16,1,0.3,1); } .ds-rail a:hover { background: rgb(255 255 255 / 0.08); color: #fff; } .ds-rail a[aria-current=\"page\"] { background: var(--gold, #f1c729); color: var(--plum-950, #1c0620); font-weight: 500; } .ds-rail a:focus-visible { outline: 2px solid var(--gold, #f1c729); outline-offset: 3px; } .ds-rail-badge { margin-left: auto; min-width: 24px; padding: 2px 7px; border-radius: 999px; background: var(--plum-950, #1c0620); color: #fff; font-size: 0.8125rem; font-weight: 600; text-align: center; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Gold Ring",
+    "overview": "A glossy magazine in Zee's own colours. The store takes its palette from her logo and flyer (deep plum, orchid, flyer pink, gold, charcoal) and its one recurring figure from the logo too: a thin gold ring with a photograph seated inside it. Satin plum fields own whole regions of the home page; the commerce pages work on a near-white paper so warm product photographs and forms have a quiet ground. Bodoni Moda carries the headlines with an italic turn on the phrase that matters, and Jost carries everything else.\n\nThe owner dashboard lives in the same world, turned down: a pale lilac ground, a flat plum side rail, white panels with hairline borders, and gold reserved for the section you are in. It reuses the storefront's buttons, fields, pills and tokens and adds no identity of its own.\n\nThe system refuses the cream-and-beige minimal luxury store. Colour is saturated and owned; surfaces are flat; depth is saved for things that float.",
+    "keyCharacteristics": [
+      "Whole bands of colour (satin plum, flyer pink, blush) instead of boxed cards on one ground.",
+      "Gold ring lines framing portraits and groupings; single pieces stay full squares.",
+      "High-contrast Bodoni display with an italic emphasis phrase, set against geometric Jost.",
+      "Pill and circle controls; softly cornered fields and media.",
+      "Flat surfaces separated by hairlines; shadow only on floating layers.",
+      "Slow, settled motion on one exponential ease-out curve."
+    ],
+    "rules": [
+      {
+        "name": "The Owned Field Rule",
+        "body": "Dark and pink are regions, not accents: a section is wholly satin plum, wholly pink, wholly blush or wholly paper, edge to edge. The satin field is plum-900 with an orchid radial bloom from one corner (plus plum-glow from the opposite corner and a faint 118deg pink sheen on the large bands).",
+        "section": "colors"
+      },
+      {
+        "name": "The Gold on Dark Rule",
+        "body": "Full-strength gold fills and gold text appear only on plum or charcoal. On light grounds gold exists only as the deep ring hairline. The single exception in the build is the no-JavaScript notice bar.",
+        "section": "colors"
+      },
+      {
+        "name": "The Paper for Commerce Rule",
+        "body": "Shop, product, gift builder, bag, checkout and help work on paper with blush support. Dark fields there are limited to one contained box (gift box, bank details).",
+        "section": "colors"
+      },
+      {
+        "name": "The Italic Turn Rule",
+        "body": "A serif headline may turn one phrase to italic at weight 400 (\"Jewelry worth *dressing up for.*\"). One turn per headline, on the phrase that carries the meaning; on the hero it also takes flyer pink.",
+        "section": "typography"
+      },
+      {
+        "name": "The Data in Sans Rule",
+        "body": "Anything a person will copy or read aloud character by character (order reference, account number, phone, price) is set in Jost with tabular numerals, even where it occupies a heading slot. Bodoni's hairlines are for words.",
+        "section": "typography"
+      },
+      {
+        "name": "The Label Is a Heading Rule",
+        "body": "The uppercase tracked label names a group of links, filters or columns. It is never placed above a headline as a kicker.",
+        "section": "typography"
+      },
+      {
+        "name": "The Only Floats Cast Rule",
+        "body": "A shadow means the element is detached from the page and sits above it (drawer, toast, menu, seal, sticky bar). Shadows are large, soft and pulled in with negative spread. Nothing in the page flow casts one.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Ring Rule",
+        "body": "The gold ring frames people and groupings: the portrait, a category, the members of a set, an editorial accent, the items gathered in a gift. The image a shopper buys from (product card, product page, gift option, bag line) is always a full square with soft corners, so no part of a piece is cropped.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "Do give each section one field colour edge to edge, and change field to change subject.",
+      "Do put people and groupings in gold rings, and overlap a small ring onto its neighbour.",
+      "Do keep the image a shopper buys from a full square with 18px corners.",
+      "Do use the gold button for the main action on a dark field and the plum button on a light one.",
+      "Do make controls pills or circles and give fields 12px corners.",
+      "Do separate with hairlines and field changes; keep shadows for the drawer, toast, menu, seal and sticky bar.",
+      "Do set order references, account numbers and prices in Jost with tabular numerals.",
+      "Do say status in words inside a tinted pill.",
+      "Do turn one phrase of a serif headline to italic 400.",
+      "Do build dashboard screens from the storefront's own buttons, fields and tokens on the lilac ground."
+    ],
+    "donts": [
+      "Don't drift toward cream or beige neutrals; every working neutral here is tinted plum.",
+      "Don't put full-strength gold fills or gold text on paper, blush or pink; use the deep ring hairline there.",
+      "Don't crop a product's own card or detail image into a circle.",
+      "Don't wrap product cards in a bordered or shadowed box.",
+      "Don't set body copy, labels, prices or references in Bodoni Moda.",
+      "Don't place the uppercase tracked label above a headline as a kicker; it names groups of links, filters and columns only.",
+      "Don't use the satin gradient for the dashboard's working area; it belongs to the storefront bands and the sign-in side.",
+      "Don't show order or stock state by colour alone.",
+      "Don't add a second easing curve or bouncy motion."
+    ]
+  }
+}

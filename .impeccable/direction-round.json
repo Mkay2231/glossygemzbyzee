@@ -1,0 +1,222 @@
+{
+  "title": "Choose the visual world for GlossyGemzbyZee",
+  "question": "The roll assigned The Grading Certificate. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Grading Certificate",
+      "kicker": "THE ROLL",
+      "lineage": "gem grading reports and security-printed certificates",
+      "thesis": "Every piece arrives with its papers: the store is a set of certificates you can shop.",
+      "palette": [
+        "#e9e6f2",
+        "#2a1f4a",
+        "#4b2fa0",
+        "#1f8a7a",
+        "#c99a2e"
+      ],
+      "materials": [
+        "security-tint paper",
+        "rainbow-printed guilloche",
+        "intaglio violet ink",
+        "foil seal"
+      ],
+      "viewport": "A full-width certificate: guilloche border, a plotted line drawing of the featured ring with leader-line annotations, a spec table (metal, stone, carat, size, ₦ price) and a foil seal that is the Add to bag button.",
+      "risk": "Can read bureaucratic if the drawings are timid; the plots must be beautiful enough to sell the piece without photos.",
+      "raised": [
+        {
+          "from": "Starship wall panel",
+          "raise": "Flat ink fields at full commitment: no glow, no soft gradients except the real rainbow-print guilloche."
+        },
+        {
+          "from": "Daylight section",
+          "raise": "Every drawing carries pinned leader-line annotations with tabular figures, so the spec is read on the piece itself."
+        },
+        {
+          "from": "ANSI nightboard",
+          "raise": "One ruled certificate grid governs every page; nothing floats off it."
+        },
+        {
+          "from": "Film cutting bench",
+          "raise": "State is a mark, not a hue: sold out is stamped, removed bag lines are struck with undo, the paid order is embossed."
+        }
+      ]
+    },
+    {
+      "id": "model-pick",
+      "label": "The Jeweller's Velvet Tray",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "the shop counter's velvet display trays and ring rolls",
+      "thesis": "The catalogue is a tray of numbered velvet slots; you lift a piece out to look closer.",
+      "palette": [
+        "#3b0f2a",
+        "#6d1a45",
+        "#e8c27a",
+        "#f2ebe4"
+      ],
+      "materials": [
+        "crushed velvet",
+        "brass slot plates",
+        "glass counter"
+      ],
+      "viewport": "A deep plum velvet tray filling the screen, nine numbered slots, one piece lifted forward under a counter lamp.",
+      "risk": "Familiar: dark, rich and gold is where most luxury jewellery sites land."
+    },
+    {
+      "id": "challenger-jacquard",
+      "label": "Woven Brocade",
+      "verdict": "competitive",
+      "lineage": "jacquard brocade and strip-woven aso-oke",
+      "thesis": "Collections woven row by row; a gold motif gathers as you scroll.",
+      "palette": [
+        "#141a3a",
+        "#d4a23a",
+        "#efe3c4",
+        "#0b0b10"
+      ],
+      "materials": [
+        "midnight silk",
+        "gold weft floats",
+        "punch-card rows"
+      ],
+      "viewport": "A midnight woven field where gold weft resolves into the featured piece's silhouette.",
+      "case": "Strong recognition with owambe and aso-oke culture; weaker on clarity, since specs and prices fight the weave.",
+      "risk": "Gold on midnight sits close to the luxury default.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-jacquard-punched-brocade-hero.webp"
+    },
+    {
+      "id": "challenger-ticket",
+      "label": "Ticket Wallet",
+      "verdict": "competitive",
+      "lineage": "jet-age airline ticket wallets",
+      "thesis": "The bag and checkout are a coupon book: each step tears off and stamps itself.",
+      "palette": [
+        "#16264f",
+        "#c8202f",
+        "#ffffff",
+        "#5b3a8a"
+      ],
+      "materials": [
+        "coupon stock",
+        "carbon copy",
+        "rubber stamps"
+      ],
+      "viewport": "Featured pieces as boarding coupons with fare boxes in ₦ and a baggage-tag Add to bag.",
+      "case": "Very clear checkout flow; shoppers don't connect travel paper with fine jewellery.",
+      "risk": "Reads as a travel brand if the jewellery doesn't dominate.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-jet-age-ticket-wallet-hero.webp"
+    },
+    {
+      "id": "challenger-elbow",
+      "label": "Starship Wall Panel",
+      "verdict": "declined",
+      "lineage": "pill-cornered sci-fi console panels",
+      "thesis": "Shop by colour banks on a black console.",
+      "palette": [
+        "#000000",
+        "#c9a6e8",
+        "#f2b48a",
+        "#e8c547"
+      ],
+      "materials": [
+        "flat paint blocks",
+        "black glass"
+      ],
+      "viewport": "Elbow-framed console with categories as pill buttons.",
+      "risk": "Pop-culture costume over fine jewellery.",
+      "case": "Shoppers don't identify with it and it hides the pieces.",
+      "kept": "Flat colour at total commitment."
+    },
+    {
+      "id": "challenger-daylight",
+      "label": "Daylight Section",
+      "verdict": "declined",
+      "lineage": "architectural sun sections",
+      "thesis": "Pieces shown as light moves across them.",
+      "palette": [
+        "#f4f1ea",
+        "#2b2b2b",
+        "#e2b04a",
+        "#7d93b2"
+      ],
+      "materials": [
+        "limewash",
+        "section poché"
+      ],
+      "viewport": "A ruled section with a moving sunbeam.",
+      "risk": "Architecture metaphor, not jewellery.",
+      "case": "Loses on both identification and clarity.",
+      "kept": "Annotations pinned to the drawing."
+    },
+    {
+      "id": "challenger-ansi",
+      "label": "ANSI Nightboard",
+      "verdict": "declined",
+      "lineage": "dial-up BBS title screens",
+      "thesis": "The store as a text board.",
+      "palette": [
+        "#000000",
+        "#00aaaa",
+        "#aa00aa",
+        "#ffffff"
+      ],
+      "materials": [
+        "block glyphs",
+        "character grid"
+      ],
+      "viewport": "80x25 menu of numbered collections.",
+      "risk": "Novelty that undercuts trust.",
+      "case": "Loses on both axes for fine jewellery.",
+      "kept": "One strict grid governs everything."
+    },
+    {
+      "id": "challenger-bench",
+      "label": "Cutting Bench",
+      "verdict": "declined",
+      "lineage": "film editing bench select rail",
+      "thesis": "Pieces strung on a perforated rail.",
+      "palette": [
+        "#000000",
+        "#ff6a1a",
+        "#ffffff"
+      ],
+      "materials": [
+        "film grain",
+        "tape flags"
+      ],
+      "viewport": "Orange rail of frames with set-aside pieces on pins.",
+      "risk": "Filmmaker world, not a shopper's.",
+      "case": "Loses on both axes.",
+      "kept": "State shown as marks, not colours."
+    }
+  ],
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "buildPath": {
+    "value": "code",
+    "toggle": false
+  },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "A clean luxury jewellery store: white space, serif wordmark, big product photos.",
+    "palette": [
+      "#ffffff",
+      "#111111",
+      "#b8975a"
+    ],
+    "materials": [
+      "clean grid",
+      "product photography"
+    ],
+    "viewport": "Full-bleed hero photo, collection tiles, best-sellers carousel.",
+    "risk": "Needs real product photography to work, and looks like every competitor."
+  },
+  "steer": true,
+  "seedKey": "b782f48f",
+  "outcome": "Superseded: the owner pinned the direction of her first site plus her logo colours."
+}
