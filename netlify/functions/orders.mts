@@ -62,7 +62,10 @@ function price(body: any, products: Product[]) {
   }
   const subtotal = items.reduce((sum: number, line: any) => sum + line.price * line.qty, 0) +
     gifts.reduce((sum: number, gift: any) => sum + gift.pieces.reduce((inner: number, piece: any) => inner + piece.price, 0), 0);
-  return { items, gifts, subtotal, need };
+  /* Cash a customer puts inside a money bouquet is passed on as it is: no sale discount on it. */
+  const cash = items.reduce((sum: number, line: any) => sum + (line.cash || 0) * line.qty, 0) +
+    gifts.reduce((sum: number, gift: any) => sum + gift.pieces.reduce((inner: number, piece: any) => inner + (piece.cash || 0), 0), 0);
+  return { items, gifts, subtotal, cash, need };
 }
 
 export default async (req: Request, context: Context) => {
@@ -98,7 +101,10 @@ export default async (req: Request, context: Context) => {
   if (!priced) return fail("The store is busy right now. Wait a moment and try again.", 503);
 
   const active = saleNow(settings) === "active";
-  const discount = active ? priced.subtotal - Math.round(priced.subtotal * (100 - settings.sale.percent) / 100) : 0;
+  /* The sale takes its percentage off the pieces and bouquet fees only, never off bouquet cash.
+     The free gift threshold is measured the same way. */
+  const discountable = priced.subtotal - priced.cash;
+  const discount = active ? discountable - Math.round(discountable * (100 - settings.sale.percent) / 100) : 0;
   const fee = delivery.state === "Lagos" ? settings.delivery.lagos : settings.delivery.other;
   const afterDiscount = priced.subtotal - discount;
   const createdAt = new Date().toISOString();
@@ -110,7 +116,7 @@ export default async (req: Request, context: Context) => {
     delivery: { ...delivery, fee },
     items: priced.items, gifts: priced.gifts,
     subtotal: priced.subtotal, discount, saleName: discount ? settings.sale.name : "",
-    freeGift: active && afterDiscount > settings.sale.giftOver,
+    freeGift: active && discountable - discount > settings.sale.giftOver,
     total: afterDiscount + (fee || 0),
     note: "", restocked: false,
   };

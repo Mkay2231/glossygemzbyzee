@@ -186,10 +186,14 @@
       count += qty;
     }
     for (const gift of gifts) { subtotal += giftPrice(gift); count += 1; }
+    /* Money-bouquet cash is passed on as it is: the sale discount and the free gift threshold leave it out. */
+    const cash = Object.entries(bag).reduce((sum, [key, qty]) => sum + split(key).cash * qty, 0) +
+      gifts.reduce((sum, gift) => sum + gift.pieces.reduce((inner, key) => inner + split(key).cash, 0), 0);
     const active = saleState() === 'active';
-    const discount = active ? subtotal - off(subtotal) : 0;
+    const discountable = subtotal - cash;
+    const discount = active ? discountable - off(discountable) : 0;
     const total = subtotal - discount;
-    return { subtotal, discount, total, count, active, freeGift: active && total > GG.sale.giftOver };
+    return { subtotal, discount, total, count, active, cash, freeGift: active && discountable - discount > GG.sale.giftOver };
   }
 
   function orderText(intro) {
@@ -209,7 +213,7 @@
       if (gift.note) lines.push(`  Note: "${gift.note}"`);
     }
     const sum = totals();
-    if (sum.discount) lines.push('', `${GG.sale.name} (${GG.sale.percent}% off): -${money(sum.discount)}`);
+    if (sum.discount) lines.push('', `${GG.sale.name} (${GG.sale.percent}% off${sum.cash ? ', bouquet cash not included' : ''}): -${money(sum.discount)}`);
     lines.push('', `Total before delivery: ${money(sum.total)}`);
     return lines.join('\n');
   }
@@ -414,7 +418,7 @@
     }
     return `<dl class="sum">
         <div><dt>Subtotal</dt><dd>${money(sum.subtotal)}</dd></div>
-        ${sum.discount ? `<div class="sum__off"><dt>${esc(sale.name)} (${sale.percent}% off)</dt><dd>-${money(sum.discount)}</dd></div>` : ''}
+        ${sum.discount ? `<div class="sum__off"><dt>${esc(sale.name)} (${sale.percent}% off${sum.cash ? ', bouquet cash not included' : ''})</dt><dd>-${money(sum.discount)}</dd></div>` : ''}
         <div><dt>Delivery</dt><dd>${delivery}</dd></div>
         <div class="sum__total"><dt>Total${typeof fee === 'number' ? '' : state === undefined ? '' : ' before delivery'}</dt><dd>${money(sum.total + (fee || 0))}</dd></div>
       </dl>${note}`;
@@ -876,7 +880,8 @@
           </select></label>` : ''}
         ${on && cash ? `<label class="option__cash">Cash inside (₦)
           <input type="number" inputmode="numeric" min="${cashLimits(product).min}" step="500" data-gift-cash="${esc(product.id)}" value="${pick.cash || ''}" placeholder="${cashLimits(product).min ? 'At least ' + cashLimits(product).min.toLocaleString('en-NG') : 'Amount'}">
-        </label>` : ''}
+        </label>
+        ${saleState() !== 'over' ? `<p class="field__hint">The ${GG.sale.percent}% sale comes off the bouquet fee, not the cash inside.</p>` : ''}` : ''}
       </div>`;
     }
 
