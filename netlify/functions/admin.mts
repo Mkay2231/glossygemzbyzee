@@ -294,6 +294,10 @@ async function saveSettings(body: any) {
   next.policies = { delivery: text(input.policies?.delivery, 1500), returns: text(input.policies?.returns, 1500) };
   const fromAddress = text(input.email?.fromAddress, 120).toLowerCase();
   if (fromAddress && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fromAddress)) throw new Refuse("The address emails come from looks incomplete.");
+  /* Resend only sends from domains verified in it; free mailboxes can never be verified. */
+  if (/@(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|icloud|aol|proton|protonmail)\./.test(fromAddress)) {
+    throw new Refuse("Emails must come from an address on your own domain, like orders@glossygemzbyzee.com. Put your Gmail address under \"Replies go to\" instead.");
+  }
   const replyTo = text(input.email?.replyTo, 120).toLowerCase();
   if (replyTo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo)) throw new Refuse("The address replies go to looks incomplete.");
   next.email = { fromAddress, fromName: text(input.email?.fromName, 60) || "Glossy Gems by Zee", replyTo };

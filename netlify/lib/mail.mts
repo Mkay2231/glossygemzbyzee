@@ -114,6 +114,7 @@ export async function sendStatusEmail(order: any, status: string, origin: string
     if (detail.name === "daily_quota_exceeded") return { sent: false, reason: "Today's free email limit is used up. Send it again tomorrow (the limit resets at 1am Lagos time)." };
     if (detail.name === "monthly_quota_exceeded") return { sent: false, reason: "This month's email limit is used up. Upgrade the Resend plan or send it again next month." };
     if (detail.name === "rate_limit_exceeded") return { sent: false, reason: "Resend is busy. Send it again in a moment." };
+    if (/not authorized to send emails from/i.test(text)) return { sent: false, reason: `"Send emails from" in Settings is ${settings.email.fromAddress}. It must be an address on your verified domain, like orders@glossygemzbyzee.com.` };
     if (/not verified|own email address/i.test(text)) return { sent: false, reason: "The sending domain isn't verified in Resend yet, or the address in Settings isn't on it." };
     if (response.status === 401 || /api key/i.test(text)) return { sent: false, reason: `Resend refused the key: "${text || detail.name || response.status}". Create a new key in Resend and paste it into RESEND_API_KEY on Netlify.` };
     return { sent: false, reason: `Resend did not send it (${text || "error " + response.status}).` };

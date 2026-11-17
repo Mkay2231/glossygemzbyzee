@@ -724,7 +724,8 @@
           <p class="field__hint">Customers get an email when you mark their order paid, shipped or delivered. Emails are sent through Resend, from an address on your verified domain.</p>
           <p class="${emailState.on ? 'mail-on' : 'notice'}">${emailState.on ? 'Emails are switched on.' : emailState.key ? 'The Resend key is set. Add the address below to switch emails on.' : 'Not switched on yet: the Resend key has not been added to the site.'}</p>
           <div class="grid2">
-            <div class="field"><label for="e-from">Send emails from</label><input id="e-from" type="email" maxlength="120" value="${esc(email.fromAddress)}" placeholder="orders@glossygemzbyzee.com"></div>
+            <div class="field"><label for="e-from">Send emails from</label><input id="e-from" type="email" maxlength="120" value="${esc(email.fromAddress)}" placeholder="orders@glossygemzbyzee.com">
+              <p class="field__hint">Must end in @glossygemzbyzee.com. It doesn't need a real inbox.</p></div>
             <div class="field"><label for="e-name">Sender name</label><input id="e-name" maxlength="60" value="${esc(email.fromName)}"></div>
             <div class="field"><label for="e-reply">Replies go to</label><input id="e-reply" type="email" maxlength="120" value="${esc(email.replyTo)}" placeholder="glossygemzbyzee@gmail.com">
               <p class="field__hint">When a customer replies to an order email, it arrives here.</p></div>
