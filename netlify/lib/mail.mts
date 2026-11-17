@@ -1,8 +1,9 @@
 import { getStore } from "@netlify/blobs";
 import { trackUrl, type Settings } from "./store.mts";
 
-/* Customer status emails, sent through Brevo's transactional API.
-   Switched on when BREVO_API_KEY is set on the site and a sender address is saved in Settings.
+/* Customer status emails, sent through Resend (https://resend.com).
+   Switched on when RESEND_API_KEY is set on the site and a sender address on a domain verified in Resend
+   is saved in Settings. Replies go to the "Replies go to" address, because the sending address has no inbox.
    For local testing only, EMAIL_OUTBOX=local stores the email in a local blob store instead of sending it. */
 
 export const EMAIL_STATUSES = ["paid", "shipped", "delivered"];
@@ -30,7 +31,7 @@ const COPY: Record<string, { subject: (ref: string) => string; heading: string; 
 };
 
 export function emailReady(settings: Settings) {
-  const key = Boolean(Netlify.env.get("BREVO_API_KEY")) || Netlify.env.get("EMAIL_OUTBOX") === "local";
+  const key = Boolean(Netlify.env.get("RESEND_API_KEY")) || Netlify.env.get("EMAIL_OUTBOX") === "local";
   return { key, sender: Boolean(settings.email.fromAddress), on: key && Boolean(settings.email.fromAddress) };
 }
 
@@ -79,30 +80,41 @@ export async function sendStatusEmail(order: any, status: string, origin: string
   if (!EMAIL_STATUSES.includes(status)) return { sent: false, reason: "" };
   if (!order.customer.email) return { sent: false, reason: "This customer did not give an email address." };
   const ready = emailReady(settings);
-  if (!ready.key) return { sent: false, reason: "Customer emails are not switched on yet (no Brevo key on the site)." };
+  if (!ready.key) return { sent: false, reason: "Customer emails are not switched on yet (no Resend key on the site)." };
   if (!ready.sender) return { sent: false, reason: "Add the address emails come from in Settings." };
   const { subject, html } = render(order, status, origin, settings);
-  const sender = { name: settings.email.fromName || "Glossy Gems by Zee", email: settings.email.fromAddress };
-  const message = { sender, replyTo: sender, to: [{ email: order.customer.email, name: order.customer.name }], subject, htmlContent: html };
+  const name = (settings.email.fromName || "Glossy Gems by Zee").replace(/[<>"]/g, "");
+  const message: Record<string, unknown> = {
+    from: `${name} <${settings.email.fromAddress}>`,
+    to: [order.customer.email],
+    subject,
+    html,
+    tags: [{ name: "status", value: status }],
+  };
+  if (settings.email.replyTo) message.reply_to = settings.email.replyTo;
 
   if (Netlify.env.get("EMAIL_OUTBOX") === "local") {
     await getStore({ name: "outbox", consistency: "strong" }).setJSON(`${order.ref}-${status}`, message);
     return { sent: true, reason: "" };
   }
   try {
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { "api-key": Netlify.env.get("BREVO_API_KEY")!, "content-type": "application/json", accept: "application/json" },
+      headers: { Authorization: `Bearer ${Netlify.env.get("RESEND_API_KEY")}`, "Content-Type": "application/json" },
       body: JSON.stringify(message),
       signal: AbortSignal.timeout(10000),
     });
     if (response.ok) return { sent: true, reason: "" };
-    const detail = await response.json().catch(() => ({})) as { message?: string };
-    console.error("brevo", response.status, detail.message);
-    if (response.status === 401) return { sent: false, reason: "Brevo refused the key. Check BREVO_API_KEY on the site." };
-    if (/sender/i.test(detail.message || "")) return { sent: false, reason: "Brevo has not verified the sender address yet. Verify it in Brevo, then send again." };
-    return { sent: false, reason: `Brevo did not send it (${detail.message || "error " + response.status}).` };
+    const detail = await response.json().catch(() => ({})) as { name?: string; message?: string };
+    console.error("resend", response.status, detail.name, detail.message);
+    const text = detail.message || "";
+    if (detail.name === "daily_quota_exceeded") return { sent: false, reason: "Today's free email limit is used up. Send it again tomorrow (the limit resets at 1am Lagos time)." };
+    if (detail.name === "monthly_quota_exceeded") return { sent: false, reason: "This month's email limit is used up. Upgrade the Resend plan or send it again next month." };
+    if (detail.name === "rate_limit_exceeded") return { sent: false, reason: "Resend is busy. Send it again in a moment." };
+    if (/not verified|own email address/i.test(text)) return { sent: false, reason: "The sending domain isn't verified in Resend yet, or the address in Settings isn't on it." };
+    if (response.status === 401 || /api key/i.test(text)) return { sent: false, reason: "Resend refused the key. Check RESEND_API_KEY on the site." };
+    return { sent: false, reason: `Resend did not send it (${text || "error " + response.status}).` };
   } catch {
-    return { sent: false, reason: "Could not reach Brevo. Try sending again in a moment." };
+    return { sent: false, reason: "Could not reach Resend. Try sending again in a moment." };
   }
 }

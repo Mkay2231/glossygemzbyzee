@@ -14,7 +14,7 @@ The online store and owner dashboard for Glossy Gems by Zee. Everything runs on 
 | `netlify/functions/admin.mts` | `/api/admin/*`: everything the dashboard does. Needs a signed-in owner. |
 | `netlify/functions/blog.mts` | `/api/blog`: published blog posts for the store. |
 | `netlify/functions/track.mts` | `/api/track`: a customer's view of their own order, by private link or by order number plus phone. |
-| `netlify/lib/mail.mts` | The paid, shipped and delivered emails, sent through Brevo. |
+| `netlify/lib/mail.mts` | The paid, shipped and delivered emails, sent through Resend. |
 | `netlify/lib/lgas.mts`, `site/js/lgas.js` | The 774 local government areas by state. Keep the two copies identical. |
 | `netlify/lib/` | Shared code: data access (`store.mts`) and the owner login (`auth.mts`). |
 | `netlify.toml` | Publish folder, functions folder and security headers. |
@@ -45,23 +45,23 @@ The first time you open the local dashboard it asks for a setup code. For local 
 
 Environment variables are frozen into each deploy. After changing one, deploy again.
 
-### Switch on customer emails (Brevo)
+### Switch on customer emails (Resend)
 
 Customers get an email when Zee marks their order paid, shipped or delivered. Until this is set up, orders still work and the order page still updates; only the emails are skipped, and the dashboard says why.
 
-1. Create a free account at brevo.com.
-2. In Brevo, add and verify the address emails should come from (Senders, Domains & Dedicated IPs → Senders). Brevo emails a confirmation link to that address.
-3. In Brevo, create an API key (SMTP & API → API keys).
-4. Add it to the site as a secret, from this folder:
+1. Create a free account at resend.com.
+2. In Resend, go to Domains, add `glossygemzbyzee.com` and choose a region. Resend lists DNS records (DKIM, SPF and a bounce MX on the `send` subdomain).
+3. Add those records at Namecheap (Domain List → glossygemzbyzee.com → Advanced DNS), then press Verify in Resend.
+4. In Resend, create an API key with "Sending access" and add it to the site as a secret, from this folder:
 
    ```bash
-   npx netlify env:set BREVO_API_KEY "paste-the-key-here" --secret
+   npx netlify env:set RESEND_API_KEY "paste-the-key-here" --secret
    ```
 
 5. Deploy again (`npm run deploy`). Environment variables only take effect on the next deploy.
-6. In the dashboard, open Settings → Customer emails, enter the verified address and save. The panel says "Emails are switched on" when everything is in place.
+6. In the dashboard, open Settings → Customer emails, set "Send emails from" to `orders@glossygemzbyzee.com`, check "Replies go to" (glossygemzbyzee@gmail.com by default) and save. The panel says "Emails are switched on" when everything is in place.
 
-Emails sent from a free mailbox address (Gmail, Yahoo) can land in spam. For the best delivery, verify the store's own domain, glossygemzbyzee.com, in Brevo (Senders, Domains & Dedicated IPs → Domains) and send from an address on it. Brevo lists the DNS records to add at Namecheap.
+The free plan sends up to 100 emails a day and 3,000 a month. If the daily limit is reached, the dashboard marks the email as not sent; use "Send again" the next day (the limit resets at 1am Lagos time).
 
 ## Domain
 
@@ -89,7 +89,7 @@ The store starts with seven sample products carried over from the first site. Ed
 1. The customer checks out. The server checks stock, applies any running sale, adds the delivery fee for their state if one is set, saves the order and lowers the stock.
 2. The customer sees the order reference, a link to their order page and, if bank details are set, the account to pay into.
 3. The customer sends payment proof to Zee on WhatsApp. That message is how Zee hears about a new order; the dashboard also shows a count of new orders.
-4. Zee marks the order paid, then shipped, then delivered. Each step emails the customer (once Brevo is set up) and updates their order page.
+4. Zee marks the order paid, then shipped, then delivered. Each step emails the customer (once Resend is set up) and updates their order page.
 5. Customers who lose the link find their order at `/order.html` with the order number and their phone number.
 
 ## Known limits
@@ -108,7 +108,7 @@ The store starts with seven sample products carried over from the first site. Ed
 - **Checkout consent:** an unticked box for the terms, refund policy and the 18+ or parental-permission statement. The server refuses orders without it and records the terms version and time on each order.
 - **Data deletion:** on a delivered or cancelled order, the dashboard's "Erase customer details" removes name, phone, email, address and notes, keeps items and amounts, and switches off the order's tracking link.
 - **Cookies:** no banner, because the store sets nothing that needs consent. The cookie policy lists everything stored; update it if a new storage key or cookie is added.
-- **Third parties:** none load in the browser. Fonts are self-hosted from `site/assets/fonts` (SIL Open Font License, in `OFL.txt`). Netlify (hosting) and Brevo (emails) process data on the server, as the privacy policy says.
+- **Third parties:** none load in the browser. Fonts are self-hosted from `site/assets/fonts` (SIL Open Font License, in `OFL.txt`). Netlify (hosting) and Resend (emails) process data on the server, as the privacy policy says.
 
 ### Images to replace
 

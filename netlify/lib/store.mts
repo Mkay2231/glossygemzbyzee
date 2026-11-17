@@ -51,9 +51,9 @@ export const DEFAULT_SETTINGS = {
   bank: { bankName: "", accountName: "", accountNumber: "" },
   contact: { whatsapp: "2349072747685", tiktok: "glossygems.by.zee", snapchat: "zhannie_xoxo" },
   policies: { delivery: "", returns: "" },
-  /* Customer emails go through Brevo. The address must be a sender verified in Brevo;
-     the API key lives only in the BREVO_API_KEY environment variable. */
-  email: { fromAddress: "", fromName: "Glossy Gems by Zee" },
+  /* Customer emails go through Resend. The address must be on a domain verified in Resend;
+     the API key lives only in the RESEND_API_KEY environment variable. */
+  email: { fromAddress: "", fromName: "Glossy Gems by Zee", replyTo: "glossygemzbyzee@gmail.com" },
 };
 export type Settings = typeof DEFAULT_SETTINGS;
 
