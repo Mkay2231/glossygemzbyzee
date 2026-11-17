@@ -993,6 +993,7 @@
         <section class="panel"><h2>Contact</h2>
           <div class="grid2">
             <div class="field"><label for="c-wa">WhatsApp number</label><input id="c-wa" type="tel" value="${esc(contact.whatsapp.replace(/^234/, '0'))}"></div>
+            <div class="field"><label for="c-ig">Instagram username</label><input id="c-ig" value="${esc(contact.instagram || '')}"></div>
             <div class="field"><label for="c-tt">TikTok username</label><input id="c-tt" value="${esc(contact.tiktok)}"></div>
             <div class="field"><label for="c-sc">Snapchat username</label><input id="c-sc" value="${esc(contact.snapchat)}"></div>
           </div>
@@ -1038,7 +1039,7 @@
           sale: { enabled: $('#sale-on').checked, name: $('#sale-name').value, start: fromLagos($('#sale-start').value), end: fromLagos($('#sale-end').value), percent: number('#sale-percent') ?? 0, giftOver: number('#sale-gift') ?? 0 },
           delivery: { lagos: number('#fee-lagos'), other: number('#fee-other') },
           bank: { bankName: $('#bank-name').value, accountName: $('#bank-holder').value, accountNumber: $('#bank-number').value },
-          contact: { whatsapp: $('#c-wa').value, tiktok: $('#c-tt').value, snapchat: $('#c-sc').value },
+          contact: { whatsapp: $('#c-wa').value, instagram: $('#c-ig').value, tiktok: $('#c-tt').value, snapchat: $('#c-sc').value },
           policies: { delivery: $('#p-delivery').value, returns: $('#p-returns').value },
           email: { fromAddress: $('#e-from').value, fromName: $('#e-name').value, replyTo: $('#e-reply').value, alertTo: $('#e-alert').value, stockAlertAt: number('#e-stock') }
         } } });

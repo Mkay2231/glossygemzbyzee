@@ -305,8 +305,14 @@ async function saveSettings(body: any) {
   if (account && (!next.bank.bankName || !next.bank.accountName)) throw new Refuse("Add the bank name and account name too.");
   const whatsapp = text(input.contact?.whatsapp, 20).replace(/[^\d]/g, "").replace(/^0/, "234");
   if (!/^234[789][01]\d{8}$/.test(whatsapp)) throw new Refuse("Enter the WhatsApp number, like 0907 274 7685.");
+  /* Usernames only; a pasted profile link is cut down to the username. */
+  const handle = (value: unknown, site: RegExp, keep: RegExp) => {
+    const raw = text(value, 200);
+    return (raw.match(site)?.[1] || raw).replace(/^@/, "").replace(keep, "").slice(0, 40);
+  };
   next.contact = {
     whatsapp,
+    instagram: handle(input.contact?.instagram, /instagram\.com\/([\w.]+)/i, /[^\w.]/g),
     tiktok: text(input.contact?.tiktok, 40).replace(/^@/, "").replace(/[^\w.]/g, ""),
     snapchat: text(input.contact?.snapchat, 40).replace(/[^\w.-]/g, ""),
   };

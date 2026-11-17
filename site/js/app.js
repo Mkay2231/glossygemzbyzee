@@ -311,6 +311,7 @@
           <ul>
             <li><a href="${wa('Hello Zee, I have a question about ' + GG.brand.name + '.')}" target="_blank" rel="noopener">WhatsApp ${waDisplay()}</a></li>
             <li><a href="mailto:${GG.business.email}">${GG.business.email}</a></li>
+            ${GG.contact.instagram ? `<li><a href="https://www.instagram.com/${esc(GG.contact.instagram)}/" target="_blank" rel="noopener">Instagram @${esc(GG.contact.instagram)}</a></li>` : ''}
             ${GG.contact.tiktok ? `<li><a href="https://www.tiktok.com/@${esc(GG.contact.tiktok)}" target="_blank" rel="noopener">TikTok @${esc(GG.contact.tiktok)}</a></li>` : ''}
             ${GG.contact.snapchat ? `<li><a href="https://www.snapchat.com/add/${esc(GG.contact.snapchat)}" target="_blank" rel="noopener">Snapchat ${esc(GG.contact.snapchat)}</a></li>` : ''}
           </ul>

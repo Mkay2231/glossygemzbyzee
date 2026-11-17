@@ -51,7 +51,7 @@ export const DEFAULT_SETTINGS = {
   },
   delivery: { lagos: null as number | null, other: null as number | null },
   bank: { bankName: "", accountName: "", accountNumber: "" },
-  contact: { whatsapp: "2349072747685", tiktok: "glossygems.by.zee", snapchat: "zhannie_xoxo" },
+  contact: { whatsapp: "2349072747685", instagram: "glossygem_by_zee", tiktok: "glossygems.by.zee", snapchat: "zhannie_xoxo" },
   policies: { delivery: "", returns: "" },
   /* Customer emails go through Resend. The address must be on a domain verified in Resend;
      the API key lives only in the RESEND_API_KEY environment variable. */

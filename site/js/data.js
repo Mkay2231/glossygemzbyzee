@@ -16,7 +16,7 @@ window.GG = {
     email: 'glossygemzbyzee@gmail.com'
   },
 
-  contact: { whatsapp: '2349072747685', tiktok: 'glossygems.by.zee', snapchat: 'zhannie_xoxo' },
+  contact: { whatsapp: '2349072747685', instagram: 'glossygem_by_zee', tiktok: 'glossygems.by.zee', snapchat: 'zhannie_xoxo' },
   sale: null,
   delivery: { lagos: null, other: null },
   policies: { delivery: '', returns: '' },
