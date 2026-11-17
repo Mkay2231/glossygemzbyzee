@@ -15,6 +15,9 @@ The online store and owner dashboard for Glossy Gems by Zee. Everything runs on 
 | `netlify/functions/blog.mts` | `/api/blog`: published blog posts for the store. |
 | `netlify/functions/restock.mts` | `/api/restock`: back-in-stock sign-ups for sold-out pieces. |
 | `netlify/functions/track.mts` | `/api/track`: a customer's view of their own order, by private link or by order number plus phone. |
+| `netlify/functions/hit.mts`, `netlify/lib/stats.mts` | `/api/hit`: cookieless visit counting for the dashboard's Visitors tab. |
+| `netlify/functions/sitemap.mts` | `/sitemap.xml`: every public page, product and post, built fresh from the catalogue. |
+| `netlify/edge-functions/previews.ts` | Writes each product's and post's own title, price, description and photo into `product.html` / `post.html` for link previews, plus Google product details. |
 | `netlify/lib/mail.mts` | The paid, shipped and delivered emails, sent through Resend. |
 | `netlify/lib/lgas.mts`, `site/js/lgas.js` | The 774 local government areas by state. Keep the two copies identical. |
 | `netlify/lib/` | Shared code: data access (`store.mts`) and the owner login (`auth.mts`). |
@@ -104,6 +107,13 @@ The store starts with seven sample products carried over from the first site. Ed
 - **Back in stock:** sold-out product pages (combos included) let customers leave an email. When the piece comes back on sale (stock raised, or a cancelled order returns it), each person gets one email and their address is deleted. The product editor shows who is waiting, with Remove and "Email them now". Each email counts towards Resend's daily limit; anyone not reached stays on the list.
 - **Stock alerts** email the alerts address when an order leaves a piece at or below the level in Settings (0 = when it sells out). Sold-out pieces are listed after available ones everywhere in the store.
 - **Rate limits.** Order and dashboard endpoints ask Netlify to rate-limit by IP. Check the limits are active on the site's plan after the first deploy.
+
+## Search and sharing
+
+- **Link previews:** a shared product link shows that piece's photo, name and price on WhatsApp, Instagram, Facebook and X; a shared blog post shows its title and cover. Other pages show the store's photo (`assets/img/model.jpg`). Product photos uploaded in the dashboard are up to 1600px; WhatsApp may skip a preview image that is very large, so keep photos reasonably compressed.
+- **Google:** product pages carry structured product details (name, price in NGN, in stock or sold out) and the home page says who the business is. `robots.txt` points to `/sitemap.xml`, which updates itself as products and posts are published.
+- **One-time step for Zee:** add the site to [Google Search Console](https://search.google.com/search-console) (Add property → URL prefix → `https://www.glossygemzbyzee.com`). Verify with the "HTML tag" option and send the tag to the developer, or with the "Domain" option via a TXT record at Namecheap. Then submit `https://www.glossygemzbyzee.com/sitemap.xml` under Sitemaps. Search Console also reports how people find the store on Google.
+- **Check a preview:** paste a product link into the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) (also refreshes WhatsApp/Instagram's cached preview) or Google's [Rich Results Test](https://search.google.com/test/rich-results).
 
 ## Policies and compliance
 

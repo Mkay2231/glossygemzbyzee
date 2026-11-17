@@ -1,5 +1,10 @@
 User-agent: *
 Disallow: /admin/
 Disallow: /api/
+# Google needs these two to draw product and blog pages
+Allow: /api/store
+Allow: /api/blog
 Disallow: /checkout.html
 Disallow: /order.html
+
+Sitemap: https://www.glossygemzbyzee.com/sitemap.xml
