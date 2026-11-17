@@ -100,3 +100,22 @@ The store starts with seven sample products carried over from the first site. Ed
 - **Small-shop storage.** Netlify Blobs suits a catalogue of hundreds of products and a few thousand orders. A much busier store should move orders to a real database.
 - **Combos and stock.** Selling a combo lowers the combo's own stock, not the stock of the pieces inside it.
 - **Rate limits.** Order and dashboard endpoints ask Netlify to rate-limit by IP. Check the limits are active on the site's plan after the first deploy.
+
+## Policies and compliance
+
+- **Policies:** `site/privacy.html`, `site/terms.html`, `site/refunds.html` and `site/cookies.html`, linked from every page's footer. They are drafts written against the Nigeria Data Protection Act 2023 and the Federal Competition and Consumer Protection Act and should be reviewed by a Nigerian lawyer. Change the "Last updated" date when editing them.
+- **Numbers in the policies to confirm:** report faulty or wrong items within 3 days of delivery; reply within 2 working days; refunds within 7 working days; order records kept for up to 6 years.
+- **Checkout consent:** an unticked box for the terms, refund policy and the 18+ or parental-permission statement. The server refuses orders without it and records the terms version and time on each order.
+- **Data deletion:** on a delivered or cancelled order, the dashboard's "Erase customer details" removes name, phone, email, address and notes, keeps items and amounts, and switches off the order's tracking link.
+- **Cookies:** no banner, because the store sets nothing that needs consent. The cookie policy lists everything stored; update it if a new storage key or cookie is added.
+- **Third parties:** none load in the browser. Fonts are self-hosted from `site/assets/fonts` (SIL Open Font License, in `OFL.txt`). Netlify (hosting) and Brevo (emails) process data on the server, as the privacy policy says.
+
+### Images to replace
+
+These came from the first site and their licence is unknown. Replace them with Zee's own photos and logo:
+
+- `site/assets/img/model.jpg` (home page hero, Combos category, blog fallback, link previews)
+- `site/assets/img/sola-hoops.jpg`, `pearl-drop-necklace.jpg`, `dune-cuff.jpg`, `lumi-dome-ring.jpg`, `fine-line-bracelet.jpg` (sample products, the home page and the Gift Builder teaser)
+- `site/assets/img/logo-badge.jpg` and `favicon.png` (header, footer, dashboard, browser tab)
+
+Product photos are replaced by uploading new ones in the dashboard; the others are files to swap in this folder.

@@ -135,6 +135,27 @@ async function updateOrder(body: any, origin: string) {
   const entry = await shop().getWithMetadata(key, { type: "json" });
   if (entry === null) throw new Refuse("That order could not be found.", 404);
   const order: any = entry.data;
+
+  /* Data deletion: remove everything that identifies the customer, keep what tax and accounting need
+     (items, amounts, dates, status). Only for finished orders, so nothing in progress loses its address. */
+  if (body.erase === true) {
+    if (!["delivered", "cancelled"].includes(order.status)) throw new Refuse("You can erase a customer's details once the order is delivered or cancelled.", 409);
+    if (!order.erasedAt) {
+      order.customer = { name: "Erased customer", phone: "", email: "" };
+      order.delivery = { ...order.delivery, address: "", city: "", lga: "", note: "" };
+      order.gifts = order.gifts.map((gift: any) => ({ ...gift, note: "" }));
+      order.note = "";
+      order.emails = (order.emails || []).map((mail: any) => ({ ...mail, to: "" }));
+      delete order.token;
+      order.erasedAt = new Date().toISOString();
+      const written = await shop().setJSON(key, order, { onlyIfMatch: entry.etag });
+      if (!written.modified) throw new Refuse("This order was changed somewhere else. Reload it.", 409);
+      await upsertIndex(rowOf(key, order));
+    }
+    return { order: { ...order, key, track: "" }, email: null };
+  }
+  if (order.erasedAt && (body.note !== undefined || body.resend)) throw new Refuse("This customer's details were erased.", 409);
+
   let changedTo = "";
   if (body.status !== undefined) {
     if (!STATUSES.includes(body.status)) throw new Refuse("That is not a status this store uses.");

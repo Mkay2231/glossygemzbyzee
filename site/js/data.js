@@ -8,6 +8,14 @@ window.GG = {
     tagline: 'A collection of grace and sophistication'
   },
 
+  /* Registered business details, shown in the footer and the policies. */
+  business: {
+    legalName: 'GLOSSYGEMZ BY ZEE ENTERPRISES',
+    cac: '8636509',
+    place: 'Magboro, Ogun State, Nigeria',
+    email: 'glossygemzbyzee@gmail.com'
+  },
+
   contact: { whatsapp: '2349072747685', tiktok: 'glossygems.by.zee', snapchat: 'zhannie_xoxo' },
   sale: null,
   delivery: { lagos: null, other: null },

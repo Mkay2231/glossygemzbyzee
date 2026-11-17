@@ -71,6 +71,7 @@ export default async (req: Request) => {
   if (!/^(?:\+?234|0)[789][01]\d{8}$/.test(customer.phone)) return fail("Enter a Nigerian mobile number, like 0803 123 4567.");
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email)) return fail(customer.email ? "That email looks incomplete." : "Enter your email so we can confirm your order.");
   if (delivery.address.length < 6 || !delivery.city) return fail("Enter the full delivery address.");
+  if (body?.agree !== true) return fail("Tick the box to agree to the terms before placing your order.");
   if (!Object.hasOwn(LGAS, delivery.state)) return fail("Choose the state to deliver to.");
   if (!LGAS[delivery.state].includes(delivery.lga)) return fail("Choose the local government area to deliver to.");
 
@@ -98,6 +99,7 @@ export default async (req: Request) => {
   const order = {
     ref: "GGZ-" + randomBytes(4).toString("hex").slice(0, 6).toUpperCase(),
     token: randomBytes(16).toString("hex"),
+    consent: { terms: "2026-11-17", at: createdAt },
     createdAt, status: "new", history: [{ status: "new", at: createdAt }], emails: [] as unknown[], customer,
     delivery: { ...delivery, fee },
     items: priced.items, gifts: priced.gifts,

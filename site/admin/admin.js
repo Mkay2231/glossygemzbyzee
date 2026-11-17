@@ -71,11 +71,11 @@
     const setup = mode === 'setup' || (setupNeeded && mode !== 'login');
     app.innerHTML = `
       <div class="gate">
-        <div class="gate__side">
+        <aside class="gate__side" aria-label="Glossy Gems by Zee">
           <img src="/assets/img/logo-badge.jpg" width="110" height="110" alt="Glossy Gems by Zee">
           <p>Your store, your orders, your pieces.</p>
-        </div>
-        <div class="gate__form">
+        </aside>
+        <main class="gate__form">
           <form novalidate>
             <h1>${setup ? 'Set up your dashboard' : 'Sign in'}</h1>
             <p class="lede">${setup ? 'Enter the setup code you were given, then choose the email and password you will sign in with.' : 'Manage orders, products and the sale.'}</p>
@@ -90,7 +90,7 @@
               ? '<button class="textlink" type="button" data-mode="login">Back to sign in</button>'
               : 'Forgot your password? <button class="textlink" type="button" data-mode="setup">Reset it with a new setup code</button>'}</p>`}
           </form>
-        </div>
+        </main>
       </div>`;
     const form = $('form');
     const error = $('.form-error');
@@ -231,6 +231,7 @@
     try { ({ order, email: emailState } = await api('order?key=' + encodeURIComponent(key))); }
     catch (error) { view.innerHTML = `<a class="back" href="#/orders">${icon('arrow')} All orders</a><div class="empty"><p class="empty__title">${esc(error.message)}</p></div>`; return; }
 
+    let erasing = false;
     const draw = (confirming) => {
       const fee = order.delivery.fee;
       const first = order.customer.name.split(/\s+/)[0];
@@ -274,9 +275,9 @@
           <div>
             <section class="panel contact"><h2>Customer</h2>
               <p class="row__strong">${esc(order.customer.name)}</p>
-              <p><a href="tel:${esc(order.customer.phone)}">${esc(order.customer.phone)}</a></p>
+              ${order.customer.phone ? `<p><a href="tel:${esc(order.customer.phone)}">${esc(order.customer.phone)}</a></p>` : ''}
               ${order.customer.email ? `<p><a href="mailto:${esc(order.customer.email)}">${esc(order.customer.email)}</a></p>` : ''}
-              <p><a class="btn btn--primary btn--small" href="https://wa.me/${esc(phone)}?text=${hello}" target="_blank" rel="noopener">${icon('chat')} Message on WhatsApp</a></p>
+              ${order.customer.phone ? `<p><a class="btn btn--primary btn--small" href="https://wa.me/${esc(phone)}?text=${hello}" target="_blank" rel="noopener">${icon('chat')} Message on WhatsApp</a></p>` : ''}
               ${order.track ? `<p class="track-link"><a href="${esc(order.track)}" target="_blank" rel="noopener">Customer's order page</a> <button class="textlink" type="button" data-copy-link>Copy link</button></p>` : ''}
             </section>
             <section class="panel"><h2>Emails to customer</h2>
@@ -284,6 +285,18 @@
               ${(order.emails || []).length ? `<ul class="items mail-log">${order.emails.slice().reverse().map(mail => `<li><span>${esc(EMAIL_LABEL[mail.status] || mail.status)}<small>${when(mail.at)}${mail.to ? ' · ' + esc(mail.to) : ''}</small>${mail.sent ? '' : `<em class="mail-fail">Not sent: ${esc(mail.reason)}</em>`}</span><span class="pill ${mail.sent ? 'pill--delivered' : 'pill--out'}">${mail.sent ? 'Sent' : 'Failed'}</span></li>`).join('')}</ul>`
                 : `<p class="row__sub">${order.customer.email ? 'An email goes out when you mark this order paid, shipped or delivered.' : 'This customer gave no email address.'}</p>`}
               ${EMAIL_LABEL[order.status] && order.customer.email ? `<div class="actions"><button class="btn btn--ghost btn--small" type="button" data-resend>Send "${esc(EMAIL_LABEL[order.status])}" email again</button></div>` : ''}
+            </section>
+            <section class="panel"><h2>Customer data</h2>
+              ${order.erasedAt
+                ? `<p class="row__sub">The customer's personal details were erased on ${when(order.erasedAt)}. Items and amounts are kept for your records.</p>`
+                : order.status === 'delivered' || order.status === 'cancelled'
+                  ? (erasing
+                    ? `<p class="confirm" role="alert">Erase this customer's name, phone, email, address and notes for good? Items and amounts stay for your records. This cannot be undone.
+                        <button class="btn btn--danger btn--small" type="button" data-erase>Yes, erase</button>
+                        <button class="btn btn--ghost btn--small" type="button" data-keep-data>Keep</button></p>`
+                    : `<p class="row__sub">If the customer asks you to delete their data, erase it here.</p>
+                       <div class="actions"><button class="btn btn--ghost btn--small" type="button" data-ask-erase>Erase customer details</button></div>`)
+                  : '<p class="row__sub">You can erase the customer\'s details once the order is delivered or cancelled.</p>'}
             </section>
             <section class="panel"><h2>Deliver to</h2>
               <p>${esc(order.delivery.address)}</p>
@@ -294,6 +307,15 @@
           </div>
         </div>`;
       $('[data-ask-cancel]', view)?.addEventListener('click', () => draw(true));
+      $('[data-ask-erase]', view)?.addEventListener('click', () => { erasing = true; draw(false); });
+      $('[data-keep-data]', view)?.addEventListener('click', () => { erasing = false; draw(false); });
+      $('[data-erase]', view)?.addEventListener('click', event => busy(event.target, 'Erasing…', async () => {
+        order = (await api('order', { method: 'POST', body: { key, erase: true } })).order;
+        erasing = false;
+        say('Customer details erased.');
+        draw(false);
+        loadOrders().catch(() => {});
+      }));
       $('[data-keep]', view)?.addEventListener('click', () => draw(false));
       for (const button of $$('[data-status]', view)) {
         button.addEventListener('click', () => busy(button, 'Saving…', async () => {

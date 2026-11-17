@@ -229,7 +229,7 @@
     const header = document.createElement('div');
     header.innerHTML = `
       <a class="skip" href="#main">Skip to content</a>
-      <a class="salebar" href="/shop.html" hidden></a>
+      <aside class="salebar-wrap" aria-label="Current sale"><a class="salebar" href="/shop.html" hidden></a></aside>
       <header class="site-header">
         <div class="wrap bar">
           <button class="icon-btn menu-btn" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="Menu">${icon('menu')}</button>
@@ -295,6 +295,7 @@
           <h2>Talk to Zee</h2>
           <ul>
             <li><a href="${wa('Hello Zee, I have a question about ' + GG.brand.name + '.')}" target="_blank" rel="noopener">WhatsApp ${waDisplay()}</a></li>
+            <li><a href="mailto:${GG.business.email}">${GG.business.email}</a></li>
             ${GG.contact.tiktok ? `<li><a href="https://www.tiktok.com/@${esc(GG.contact.tiktok)}" target="_blank" rel="noopener">TikTok @${esc(GG.contact.tiktok)}</a></li>` : ''}
             ${GG.contact.snapchat ? `<li><a href="https://www.snapchat.com/add/${esc(GG.contact.snapchat)}" target="_blank" rel="noopener">Snapchat ${esc(GG.contact.snapchat)}</a></li>` : ''}
           </ul>
@@ -310,7 +311,11 @@
           </ul>
         </div>
       </div>
-      <div class="wrap footer-base"><span>© ${new Date().getFullYear()} ${esc(GG.brand.name)}</span><a href="#top">Back to top</a></div>`;
+      <div class="wrap footer-base">
+        <nav class="footer-legal" aria-label="Legal"><a href="/privacy.html">Privacy policy</a><a href="/terms.html">Terms of service</a><a href="/refunds.html">Refund policy</a><a href="/cookies.html">Cookie policy</a></nav>
+        <a href="#top">Back to top</a>
+        <p class="footer-biz">© ${new Date().getFullYear()} ${esc(GG.business.legalName)} · CAC registration no. ${esc(GG.business.cac)} · ${esc(GG.business.place)}</p>
+      </div>`;
   }
 
   function countdown(target) {
@@ -1048,8 +1053,11 @@
                 <textarea id="note" name="note" rows="3" maxlength="300" placeholder="Landmark, gate code, best time to call"></textarea>
               </div>
             </fieldset>
+            <label class="consent"><input type="checkbox" id="agree" name="agree" aria-describedby="agree-error">
+              <span>I agree to the <a href="/terms.html" target="_blank">terms of service</a> and <a href="/refunds.html" target="_blank">refund policy</a>, and I'm 18 or older or have a parent or guardian's permission.</span></label>
+            <p class="field__error" id="agree-error" hidden></p>
             <button class="btn btn--primary btn--block" type="submit">Place order</button>
-            <p class="field__hint">Your details go to ${esc(GG.brand.name)} only, to process and deliver this order.</p>
+            <p class="field__hint">We use your details only to process, deliver and update you about this order. See our <a class="textlink" href="/privacy.html" target="_blank">privacy policy</a>.</p>
           </form>
           <aside class="summary" data-summary aria-label="Order summary"></aside>
         </div>`;
@@ -1065,7 +1073,9 @@
     }
 
     function check(input) {
-      const rule = input.id === 'state'
+      const rule = input.id === 'agree'
+        ? () => input.checked ? '' : 'Tick the box to agree before placing your order.'
+        : input.id === 'state'
         ? value => value ? '' : 'Choose the state to deliver to.'
         : input.id === 'lga'
           ? value => value ? '' : $('#state').value ? 'Choose the local government area.' : 'Choose a state first, then the local government area.'
@@ -1120,6 +1130,7 @@
       const body = {
         name: form.name.value, phone: form.phone.value, email: form.email.value,
         address: form.address.value, city: form.city.value, state: form.state.value, lga: form.lga.value, note: form.note.value,
+        agree: form.agree.checked,
         items: Object.entries(bag).map(([key, qty]) => ({ ...split(key), qty })),
         gifts: gifts.map(gift => ({ pieces: gift.pieces.map(split), note: gift.note }))
       };
@@ -1385,7 +1396,7 @@
         ${GG.policies.delivery ? paragraphs(GG.policies.delivery) : ''}`;
       $('#help-returns').innerHTML = GG.policies.returns
         ? paragraphs(GG.policies.returns)
-        : `<p>For returns and exchanges, message Zee on WhatsApp with your order number before sending anything back.</p>`;
+        : `<p>If an item arrives faulty, damaged or not what you ordered, tell Zee within 3 days of delivery and she'll replace it or refund you. Read the full <a href="/refunds.html">refund policy</a>.</p>`;
       $('#help-sizes').innerHTML = `<table class="sizes-table"><thead><tr><th>US size</th><th>Inside diameter</th></tr></thead>
         <tbody>${GG.ringSizes.map(([label, mm]) => `<tr><td>${label}</td><td>${mm}</td></tr>`).join('')}</tbody></table>
         <p>These are standard US ring sizes. If you are between sizes or unsure which scale a ring uses, ask Zee before you order.</p>`;

@@ -69,7 +69,7 @@ ${row(order.delivery.fee === null ? "Total before delivery" : "Total", money(ord
 ${link ? `<p style="margin:0 0 24px;"><a href="${esc(link)}" style="display:inline-block;background:#690365;color:#ffffff;text-decoration:none;padding:13px 24px;border-radius:999px;font-weight:600;font-size:15px;">View your order</a></p>` : ""}
 <p style="margin:0;font-size:14px;line-height:1.5;color:#6d4d72;">Questions? Message Zee on WhatsApp: <a href="${esc(wa)}" style="color:#690365;">${esc(settings.contact.whatsapp.replace(/^234(\d{3})(\d{3})(\d{4})$/, "0$1 $2 $3"))}</a></p>
 </td></tr>
-<tr><td style="padding:16px 28px;background:#2a3135;color:#c7d0d4;font-size:12px;">Glossy Gems by Zee · a collection of grace and sophistication</td></tr>
+<tr><td style="padding:16px 28px;background:#2a3135;color:#c7d0d4;font-size:12px;line-height:1.6;">You're getting this email because you placed order ${esc(order.ref)}. We only email you about your orders and never send marketing, so there's nothing to unsubscribe from. <a href="${esc(origin)}/privacy.html" style="color:#f5cc7e;">Privacy policy</a><br>GLOSSYGEMZ BY ZEE ENTERPRISES · CAC registration no. 8636509 · Magboro, Ogun State, Nigeria</td></tr>
 </table></td></tr></table></body></html>`;
   return { subject: copy.subject(order.ref), html };
 }
