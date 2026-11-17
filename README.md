@@ -98,7 +98,8 @@ The store starts with seven sample products carried over from the first site. Ed
 - **No card payments.** Payment is by bank transfer. A provider such as Paystack can be added later.
 - **One owner login.** There are no staff accounts.
 - **Small-shop storage.** Netlify Blobs suits a catalogue of hundreds of products and a few thousand orders. A much busier store should move orders to a real database.
-- **Combos and stock.** Selling a combo lowers the combo's own stock, not the stock of the pieces inside it.
+- **Combos and stock.** A combo shows as sold out (and can't be ordered) the moment any of its pieces sells out. Selling a combo lowers the combo's own stock, not the stock of the pieces inside it.
+- **Stock alerts** email the alerts address when an order leaves a piece at or below the level in Settings (0 = when it sells out). Sold-out pieces are listed after available ones everywhere in the store.
 - **Rate limits.** Order and dashboard endpoints ask Netlify to rate-limit by IP. Check the limits are active on the site's plan after the first deploy.
 
 ## Policies and compliance

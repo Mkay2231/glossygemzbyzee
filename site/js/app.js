@@ -93,7 +93,9 @@
   const photoUrl = photo => /^[a-f0-9-]{36}$/.test(photo) ? '/media/' + photo : '/' + String(photo).replace(/^\//, '');
   const src = product => photoUrl(product.photos[0] || 'assets/img/logo-badge.jpg');
   const link = product => '/product.html?id=' + encodeURIComponent(product.id);
-  const pieces = () => GG.catalog.filter(product => !product.members);
+  /* Available pieces first, sold-out ones at the end, otherwise keeping the order given. */
+  const availableFirst = list => [...list].sort((a, b) => (a.stock === 0) - (b.stock === 0));
+  const pieces = () => availableFirst(GG.catalog.filter(product => !product.members));
   const stockOf = product => Math.max(0, Math.min(99, product.stock ?? 99));
   const waDisplay = () => GG.contact.whatsapp.replace(/^234(\d{3})(\d{3})(\d{4})$/, '0$1 $2 $3');
 
@@ -546,7 +548,7 @@
       const featured = pieces().slice(0, 5);
       $('#collection-grid').innerHTML = featured.map((product, index) => card(product, index === 0 && featured.length === 5)).join('') ||
         '<div class="empty"><p class="empty__title">New pieces are on their way.</p><p>Message Zee on WhatsApp to hear first.</p></div>';
-      const sets = GG.catalog.filter(product => product.members);
+      const sets = availableFirst(GG.catalog.filter(product => product.members));
       $('.sets').hidden = !sets.length;
       $('#sets').innerHTML = sets.map(product => {
         const members = product.members.map(byId).filter(Boolean);
@@ -628,9 +630,10 @@
           (!state.saved || saved.includes(String(product.id))) &&
           terms.every(term => text.includes(term));
       });
-      if (state.sort === 'low') list = [...list].sort((a, b) => a.price - b.price);
-      if (state.sort === 'high') list = [...list].sort((a, b) => b.price - a.price);
-      if (state.sort === 'name') list = [...list].sort((a, b) => a.name.localeCompare(b.name));
+      list = availableFirst(list);
+      if (state.sort === 'low') list = availableFirst([...list].sort((a, b) => a.price - b.price));
+      if (state.sort === 'high') list = availableFirst([...list].sort((a, b) => b.price - a.price));
+      if (state.sort === 'name') list = availableFirst([...list].sort((a, b) => a.name.localeCompare(b.name)));
 
       $('#shop-title').textContent = state.saved ? 'Saved pieces' : state.type || 'The collection';
       $('[data-types]').innerHTML = ['', ...GG.types].map(type => {
@@ -700,7 +703,7 @@
       /* One row of suggestions: sets this piece comes in first, then other pieces, then other sets. */
       const sets = GG.catalog.filter(product => product.members?.includes(item.id));
       const rest = GG.catalog.filter(product => product.id !== item.id && !sets.includes(product) && !item.members?.includes(product.id));
-      const others = [...sets, ...rest.filter(product => !product.members), ...rest.filter(product => product.members)].slice(0, 4);
+      const others = availableFirst([...sets, ...rest.filter(product => !product.members), ...rest.filter(product => product.members)]).slice(0, 4);
       const soldOut = item.stock === 0;
       const photos = item.photos.length > 1 ? item.photos : null;
       const state = saleState();

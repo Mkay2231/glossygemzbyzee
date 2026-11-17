@@ -184,3 +184,30 @@ ${order.discount ? `<tr><td style="${cell}">${esc(order.saleName)}</td><td style
   if (order.customer.email) message.reply_to = order.customer.email;
   return deliver(message, `${order.ref}-alert`, settings);
 }
+
+/* Stock alert for the owner: pieces that just ran low or sold out because of an order. */
+export async function sendStockAlert(items: { id: string; name: string; left: number }[], ref: string, origin: string, settings: Settings) {
+  const to = settings.email.alertTo;
+  if (!to) return { sent: false, reason: "Alerts are off." };
+  if (!emailReady(settings).on) return { sent: false, reason: "Emails are not switched on." };
+  const out = items.filter(item => item.left <= 0);
+  const subject = items.length === 1
+    ? (out.length ? `Sold out: ${items[0].name}` : `Running low: ${items[0].name} (${items[0].left} left)`)
+    : `Stock alert: ${items.length} pieces ${out.length === items.length ? "sold out" : "running low"}`;
+  const rows = items.map(item => `<tr><td style="padding:10px 0;border-bottom:1px solid #ecd3ee;">${esc(item.name)}</td>
+    <td style="padding:10px 0;border-bottom:1px solid #ecd3ee;text-align:right;font-weight:600;color:${item.left <= 0 ? "#a3123f" : "#2a0f2e"};">${item.left <= 0 ? "Sold out" : `${item.left} left`}</td>
+    <td style="padding:10px 0 10px 16px;border-bottom:1px solid #ecd3ee;text-align:right;"><a href="${esc(`${origin}/admin/#/products/${encodeURIComponent(item.id)}`)}" style="color:#690365;">Restock</a></td></tr>`).join("");
+  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#fdeeff;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdeeff;padding:20px 12px;font-family:Arial,Helvetica,sans-serif;color:#2a0f2e;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;">
+<tr><td style="background:#2c0a31;padding:18px 24px;color:#f5cc7e;font-size:14px;letter-spacing:2px;">STOCK ALERT</td></tr>
+<tr><td style="padding:24px;">
+<p style="margin:0 0 14px;font-size:15px;line-height:1.5;">Order ${esc(ref)} just took ${items.length === 1 ? "this piece" : "these pieces"} ${out.length === items.length ? "out of stock" : "to a low level"}. ${out.length ? "Sold-out pieces show as Sold out in the store until you add stock, and any combo that uses them does too." : ""}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;">${rows}</table>
+</td></tr>
+<tr><td style="padding:14px 24px;background:#2a3135;color:#c7d0d4;font-size:12px;">Sent because stock alerts are on in Settings → Customer emails.</td></tr>
+</table></td></tr></table></body></html>`;
+  const name = (settings.email.fromName || "Glossy Gems by Zee").replace(/[<>"]/g, "");
+  return deliver({ from: `${name} <${settings.email.fromAddress}>`, to: [to], subject, html, tags: [{ name: "status", value: "stock-alert" }] }, `${ref}-stock`, settings);
+}

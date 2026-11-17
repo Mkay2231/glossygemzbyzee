@@ -53,7 +53,9 @@ export const DEFAULT_SETTINGS = {
   policies: { delivery: "", returns: "" },
   /* Customer emails go through Resend. The address must be on a domain verified in Resend;
      the API key lives only in the RESEND_API_KEY environment variable. */
-  email: { fromAddress: "", fromName: "Glossy Gems by Zee", replyTo: "glossygemzbyzee@gmail.com", alertTo: "glossygemzbyzee@gmail.com" },
+  email: { fromAddress: "", fromName: "Glossy Gems by Zee", replyTo: "glossygemzbyzee@gmail.com", alertTo: "glossygemzbyzee@gmail.com",
+    /* Email the owner when an order leaves a piece with this many or fewer; null turns stock alerts off. */
+    stockAlertAt: 0 as number | null },
 };
 export type Settings = typeof DEFAULT_SETTINGS;
 
@@ -164,6 +166,16 @@ export async function listOrders(): Promise<OrderRow[]> {
   }
   const keys = new Set(blobs.map(blob => blob.key));
   return [...known.values()].filter(row => keys.has(row.key)).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+/* ---------- stock ---------- */
+/* A combo is sold out the moment any of its pieces is, because it is made from them.
+   Unpublished or deleted pieces count as unavailable. */
+export function sellable(product: Product, products: Product[]) {
+  if (!product.members?.length) return product.stock;
+  const pieces = product.members.map(id => products.find(item => item.id === id && item.published));
+  if (pieces.some(piece => !piece)) return 0;
+  return Math.min(product.stock, ...pieces.map(piece => piece!.stock));
 }
 
 /* ---------- blog ---------- */

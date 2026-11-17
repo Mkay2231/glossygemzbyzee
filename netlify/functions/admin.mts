@@ -302,7 +302,9 @@ async function saveSettings(body: any) {
   if (replyTo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo)) throw new Refuse("The address replies go to looks incomplete.");
   const alertTo = text(input.email?.alertTo, 120).toLowerCase();
   if (alertTo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(alertTo)) throw new Refuse("The address for new order alerts looks incomplete.");
-  next.email = { fromAddress, fromName: text(input.email?.fromName, 60) || "Glossy Gems by Zee", replyTo, alertTo };
+  const stockAlertAt = input.email?.stockAlertAt === null || input.email?.stockAlertAt === "" || input.email?.stockAlertAt === undefined ? null : input.email.stockAlertAt;
+  if (stockAlertAt !== null && !whole(stockAlertAt, 0, 999)) throw new Refuse("The stock alert level must be a whole number, or empty to turn it off.");
+  next.email = { fromAddress, fromName: text(input.email?.fromName, 60) || "Glossy Gems by Zee", replyTo, alertTo, stockAlertAt };
   await shop().setJSON("settings", next);
   return { settings: next, email: emailReady(next) };
 }

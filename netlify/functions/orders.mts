@@ -2,10 +2,10 @@ import type { Config, Context } from "@netlify/functions";
 import { randomBytes } from "node:crypto";
 import {
   shop, readCatalog, writeCatalog, readSettings, saleNow, rowOf, upsertIndex,
-  json, fail, text, whole, sameOrigin, type Product,
+  json, fail, text, whole, sameOrigin, sellable, type Product,
 } from "../lib/store.mts";
 import { LGAS } from "../lib/lgas.mts";
-import { sendOrderAlert } from "../lib/mail.mts";
+import { sendOrderAlert, sendStockAlert } from "../lib/mail.mts";
 
 class Refuse extends Error {}
 
@@ -55,6 +55,10 @@ function price(body: any, products: Product[]) {
     if (product.stock < qty) {
       throw new Refuse(product.stock ? `Only ${product.stock} of the ${product.name} left. Lower the quantity and try again.` : `The ${product.name} has just sold out.`);
     }
+    if (product.members?.length && sellable(product, products) < 1) {
+      const gone = product.members.map(member => live.get(member)).find(piece => !piece || piece.stock < 1);
+      throw new Refuse(`The ${product.name} is sold out${gone ? ` because the ${gone.name} has sold out` : ""}.`);
+    }
   }
   const subtotal = items.reduce((sum: number, line: any) => sum + line.price * line.qty, 0) +
     gifts.reduce((sum: number, gift: any) => sum + gift.pieces.reduce((inner: number, piece: any) => inner + piece.price, 0), 0);
@@ -78,13 +82,14 @@ export default async (req: Request, context: Context) => {
 
   const settings = await readSettings();
   let priced: ReturnType<typeof price> | undefined;
+  let before: Product[] = [];
   try {
     /* Take the stock and save the catalogue in one conditional write; retry if someone else saved first. */
     for (let attempt = 0; attempt < 5 && !priced; attempt++) {
       const { products, etag } = await readCatalog();
       const result = price(body, products);
       const next = products.map(product => result.need.has(product.id) ? { ...product, stock: product.stock - result.need.get(product.id)! } : product);
-      if (await writeCatalog(next, etag)) priced = result;
+      if (await writeCatalog(next, etag)) { priced = result; before = products; }
     }
   } catch (error) {
     if (error instanceof Refuse) return fail(error.message, 409);
@@ -116,10 +121,21 @@ export default async (req: Request, context: Context) => {
 
   /* Tell the owner about the new order. Sent after the response so checkout never waits on email,
      and a failed alert never fails the order. */
-  const alert = sendOrderAlert(order, key, new URL(req.url).origin, settings)
-    .then(result => { if (!result.sent && result.reason && !/off|not switched on/.test(result.reason)) console.error("order alert", order.ref, result.reason); })
-    .catch(error => console.error("order alert", order.ref, error));
-  if (typeof context?.waitUntil === "function") context.waitUntil(alert); else await alert;
+  const origin = new URL(req.url).origin;
+  const quietly = (label: string) => (result: { sent: boolean; reason: string }) => {
+    if (!result.sent && result.reason && !/off|not switched on/.test(result.reason)) console.error(label, order.ref, result.reason);
+  };
+  /* Stock alert: pieces this order took to the owner's threshold or below (sold out by default). */
+  const threshold = settings.email.stockAlertAt;
+  const low = threshold === null || threshold === undefined ? [] : [...priced.need].map(([id, qty]) => {
+    const product = before.find(item => item.id === id)!;
+    return { id, name: product.name, was: product.stock, left: product.stock - qty };
+  }).filter(item => item.was > threshold && item.left <= threshold);
+  const alerts = Promise.all([
+    sendOrderAlert(order, key, origin, settings).then(quietly("order alert")),
+    low.length ? sendStockAlert(low, order.ref, origin, settings).then(quietly("stock alert")) : null,
+  ]).catch(error => console.error("alerts", order.ref, error));
+  if (typeof context?.waitUntil === "function") context.waitUntil(alerts); else await alerts;
 
   const { note, restocked, emails, ...receipt } = order;
   return json({ order: receipt, bank: settings.bank.accountNumber ? settings.bank : null }, 201);

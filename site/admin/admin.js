@@ -349,7 +349,8 @@
   }
 
   /* ---------- products ---------- */
-  const productState = product => !product.published ? ['draft', 'Draft'] : product.stock === 0 ? ['out', 'Sold out'] : ['live', 'In store'];
+  const pieceOut = product => product.members?.length > 0 && product.members.some(id => { const piece = state.products.find(item => item.id === id); return !piece || !piece.published || piece.stock === 0; });
+  const productState = product => !product.published ? ['draft', 'Draft'] : product.stock === 0 ? ['out', 'Sold out'] : pieceOut(product) ? ['out', 'A piece is sold out'] : ['live', 'In store'];
   const thumbOf = product => {
     const photo = product.photos[0] || state.products.find(item => product.members.includes(item.id) && item.photos.length)?.photos[0];
     return photo ? `<img src="${esc(photoUrl(photo))}" alt="" width="56" height="56" loading="lazy">` : `<span class="thumb--none">${icon('image')}</span>`;
@@ -360,7 +361,7 @@
       ['all', 'All', () => true],
       ['live', 'In store', product => product.published && product.stock > 0],
       ['draft', 'Drafts', product => !product.published],
-      ['out', 'Sold out', product => product.published && product.stock === 0],
+      ['out', 'Sold out', product => product.published && (product.stock === 0 || pieceOut(product))],
       ['gift', 'Gift items', product => product.type === GIFT_TYPE]
     ];
     const draw = () => {
@@ -731,6 +732,8 @@
               <p class="field__hint">When a customer replies to an order email, it arrives here.</p></div>
             <div class="field"><label for="e-alert">New order alerts go to</label><input id="e-alert" type="email" maxlength="120" value="${esc(email.alertTo)}" placeholder="glossygemzbyzee@gmail.com">
               <p class="field__hint">You get an email the moment an order is placed. Leave empty to turn alerts off.</p></div>
+            <div class="field"><label for="e-stock">Stock alert when a piece has this many left</label><input id="e-stock" type="number" inputmode="numeric" min="0" max="999" value="${esc(email.stockAlertAt ?? '')}">
+              <p class="field__hint">0 emails you when a piece sells out; 2 warns you when only 2 are left. Leave empty for no stock alerts. Sent to the alerts address above.</p></div>
           </div>
         </section>
         <section class="panel"><h2>Store policies</h2>
@@ -761,7 +764,7 @@
           bank: { bankName: $('#bank-name').value, accountName: $('#bank-holder').value, accountNumber: $('#bank-number').value },
           contact: { whatsapp: $('#c-wa').value, tiktok: $('#c-tt').value, snapchat: $('#c-sc').value },
           policies: { delivery: $('#p-delivery').value, returns: $('#p-returns').value },
-          email: { fromAddress: $('#e-from').value, fromName: $('#e-name').value, replyTo: $('#e-reply').value, alertTo: $('#e-alert').value }
+          email: { fromAddress: $('#e-from').value, fromName: $('#e-name').value, replyTo: $('#e-reply').value, alertTo: $('#e-alert').value, stockAlertAt: number('#e-stock') }
         } } });
         state.dirty = false;
         settingsView(view).then(() => say('Settings saved. The store updates right away.'));
