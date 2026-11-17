@@ -53,7 +53,7 @@ export const DEFAULT_SETTINGS = {
   policies: { delivery: "", returns: "" },
   /* Customer emails go through Resend. The address must be on a domain verified in Resend;
      the API key lives only in the RESEND_API_KEY environment variable. */
-  email: { fromAddress: "", fromName: "Glossy Gems by Zee", replyTo: "glossygemzbyzee@gmail.com" },
+  email: { fromAddress: "", fromName: "Glossy Gems by Zee", replyTo: "glossygemzbyzee@gmail.com", alertTo: "glossygemzbyzee@gmail.com" },
 };
 export type Settings = typeof DEFAULT_SETTINGS;
 

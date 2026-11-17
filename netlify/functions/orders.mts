@@ -1,10 +1,11 @@
-import type { Config } from "@netlify/functions";
+import type { Config, Context } from "@netlify/functions";
 import { randomBytes } from "node:crypto";
 import {
   shop, readCatalog, writeCatalog, readSettings, saleNow, rowOf, upsertIndex,
   json, fail, text, whole, sameOrigin, type Product,
 } from "../lib/store.mts";
 import { LGAS } from "../lib/lgas.mts";
+import { sendOrderAlert } from "../lib/mail.mts";
 
 class Refuse extends Error {}
 
@@ -60,7 +61,7 @@ function price(body: any, products: Product[]) {
   return { items, gifts, subtotal, need };
 }
 
-export default async (req: Request) => {
+export default async (req: Request, context: Context) => {
   if (!sameOrigin(req)) return fail("This request did not come from the store.", 403);
   let body: any;
   try { body = await req.json(); } catch { return fail("Your order could not be read. Refresh the page and try again."); }
@@ -112,6 +113,13 @@ export default async (req: Request) => {
   await shop().setJSON(key, order);
   await shop().setJSON(`refs/${order.ref}`, { key });
   await upsertIndex(rowOf(key, order));
+
+  /* Tell the owner about the new order. Sent after the response so checkout never waits on email,
+     and a failed alert never fails the order. */
+  const alert = sendOrderAlert(order, key, new URL(req.url).origin, settings)
+    .then(result => { if (!result.sent && result.reason && !/off|not switched on/.test(result.reason)) console.error("order alert", order.ref, result.reason); })
+    .catch(error => console.error("order alert", order.ref, error));
+  if (typeof context?.waitUntil === "function") context.waitUntil(alert); else await alert;
 
   const { note, restocked, emails, ...receipt } = order;
   return json({ order: receipt, bank: settings.bank.accountNumber ? settings.bank : null }, 201);

@@ -96,8 +96,13 @@ export async function sendStatusEmail(order: any, status: string, origin: string
   };
   if (settings.email.replyTo) message.reply_to = settings.email.replyTo;
 
+  return deliver(message, `${order.ref}-${status}`, settings);
+}
+
+/* Sends one message through Resend (or the local outbox). Returns { sent, reason }; never throws. */
+async function deliver(message: Record<string, unknown>, outboxKey: string, settings: Settings) {
   if (Netlify.env.get("EMAIL_OUTBOX") === "local") {
-    await getStore({ name: "outbox", consistency: "strong" }).setJSON(`${order.ref}-${status}`, message);
+    await getStore({ name: "outbox", consistency: "strong" }).setJSON(outboxKey, message);
     return { sent: true, reason: "" };
   }
   try {
@@ -121,4 +126,61 @@ export async function sendStatusEmail(order: any, status: string, origin: string
   } catch {
     return { sent: false, reason: "Could not reach Resend. Try sending again in a moment." };
   }
+}
+
+/* New-order alert for the owner: everything needed to act on the order without opening the dashboard first. */
+export async function sendOrderAlert(order: any, key: string, origin: string, settings: Settings) {
+  const to = settings.email.alertTo;
+  if (!to) return { sent: false, reason: "New order alerts are off." };
+  const ready = emailReady(settings);
+  if (!ready.on) return { sent: false, reason: "Emails are not switched on." };
+
+  const option = (size: string) => size ? ` (${/^\d+(\.\d+)?$/.test(size) ? "size " : ""}${size})` : "";
+  const lines = [
+    ...order.items.map((line: any) => [`${line.qty} × ${line.name}${option(line.size)}`, money(line.price * line.qty), ""]),
+    ...order.gifts.map((gift: any) => [
+      `Gift: ${gift.pieces.map((piece: any) => piece.name + option(piece.size) + (piece.cash ? ` (${money(piece.cash)} cash + ${money(piece.fee)} fee)` : "")).join(", ")}`,
+      money(gift.pieces.reduce((sum: number, piece: any) => sum + piece.price, 0)),
+      gift.note ? `Note: “${gift.note}”` : "",
+    ]),
+  ];
+  const fee = order.delivery.fee;
+  const phone = order.customer.phone.replace(/^\+/, "").replace(/^0/, "234");
+  const where = [order.delivery.address, order.delivery.city, order.delivery.lga && order.delivery.lga + " LGA", order.delivery.state].filter(Boolean).join(", ");
+  const dashboard = `${origin}/admin/#/orders/${encodeURIComponent(key)}`;
+  const cell = "padding:8px 0;border-bottom:1px solid #ecd3ee;vertical-align:top;";
+  const html = `<!doctype html><html><body style="margin:0;padding:0;background:#fdeeff;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fdeeff;padding:20px 12px;font-family:Arial,Helvetica,sans-serif;color:#2a0f2e;">
+<tr><td align="center">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:18px;overflow:hidden;">
+<tr><td style="background:#2c0a31;padding:18px 24px;color:#f5cc7e;font-size:14px;letter-spacing:2px;">NEW ORDER</td></tr>
+<tr><td style="padding:24px;">
+<h1 style="margin:0 0 4px;font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:28px;">${esc(order.ref)} · ${esc(money(order.total))}</h1>
+<p style="margin:0 0 18px;color:#6d4d72;font-size:14px;">${fee === null ? "Before delivery: agree the delivery fee with the customer." : "Includes delivery."}${order.freeGift ? " Earned a free gift: pack one." : ""}</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-size:15px;">
+${lines.map(([left, right, note]) => `<tr><td style="${cell}">${esc(left)}${note ? `<br><span style="color:#690365;font-style:italic;">${esc(note)}</span>` : ""}</td><td style="${cell}text-align:right;white-space:nowrap;">${esc(right)}</td></tr>`).join("")}
+${order.discount ? `<tr><td style="${cell}">${esc(order.saleName)}</td><td style="${cell}text-align:right;">-${esc(money(order.discount))}</td></tr>` : ""}
+<tr><td style="${cell}">Delivery</td><td style="${cell}text-align:right;">${fee === null ? "Not set" : fee === 0 ? "Free" : esc(money(fee))}</td></tr>
+</table>
+<p style="margin:20px 0 4px;font-size:14px;color:#6d4d72;">Customer</p>
+<p style="margin:0;font-size:15px;line-height:1.6;">${esc(order.customer.name)}<br>${esc(order.customer.phone)}<br>${esc(order.customer.email)}</p>
+<p style="margin:16px 0 4px;font-size:14px;color:#6d4d72;">Deliver to</p>
+<p style="margin:0;font-size:15px;line-height:1.6;">${esc(where)}${order.delivery.note ? `<br><span style="color:#6d4d72;">Note: ${esc(order.delivery.note)}</span>` : ""}</p>
+<p style="margin:24px 0 0;">
+<a href="${esc(dashboard)}" style="display:inline-block;background:#690365;color:#ffffff;text-decoration:none;padding:12px 22px;border-radius:999px;font-weight:600;font-size:15px;margin:0 8px 8px 0;">Open in dashboard</a>
+<a href="https://wa.me/${esc(phone)}" style="display:inline-block;border:1.5px solid #690365;color:#690365;text-decoration:none;padding:11px 20px;border-radius:999px;font-weight:600;font-size:15px;">WhatsApp the customer</a>
+</p>
+</td></tr>
+<tr><td style="padding:14px 24px;background:#2a3135;color:#c7d0d4;font-size:12px;">Sent to you because new order alerts are on in Settings. Turn them off there by clearing the address.</td></tr>
+</table></td></tr></table></body></html>`;
+  const name = (settings.email.fromName || "Glossy Gems by Zee").replace(/[<>"]/g, "");
+  const message: Record<string, unknown> = {
+    from: `${name} <${settings.email.fromAddress}>`,
+    to: [to],
+    subject: `New order ${order.ref} · ${money(order.total)} · ${order.customer.name}`,
+    html,
+    tags: [{ name: "status", value: "new-order-alert" }],
+  };
+  if (order.customer.email) message.reply_to = order.customer.email;
+  return deliver(message, `${order.ref}-alert`, settings);
 }

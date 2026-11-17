@@ -94,7 +94,7 @@ The store starts with seven sample products carried over from the first site. Ed
 
 ## Known limits
 
-- **No alerts for Zee.** Customers get emails, but Zee gets no email or SMS when an order arrives. She relies on the customer's WhatsApp message and on checking the dashboard.
+- **New order alerts** go by email to the address in Settings → Customer emails (glossygemzbyzee@gmail.com by default). Each alert counts towards Resend's daily limit. There is no SMS alert.
 - **No card payments.** Payment is by bank transfer. A provider such as Paystack can be added later.
 - **One owner login.** There are no staff accounts.
 - **Small-shop storage.** Netlify Blobs suits a catalogue of hundreds of products and a few thousand orders. A much busier store should move orders to a real database.

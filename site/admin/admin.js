@@ -729,6 +729,8 @@
             <div class="field"><label for="e-name">Sender name</label><input id="e-name" maxlength="60" value="${esc(email.fromName)}"></div>
             <div class="field"><label for="e-reply">Replies go to</label><input id="e-reply" type="email" maxlength="120" value="${esc(email.replyTo)}" placeholder="glossygemzbyzee@gmail.com">
               <p class="field__hint">When a customer replies to an order email, it arrives here.</p></div>
+            <div class="field"><label for="e-alert">New order alerts go to</label><input id="e-alert" type="email" maxlength="120" value="${esc(email.alertTo)}" placeholder="glossygemzbyzee@gmail.com">
+              <p class="field__hint">You get an email the moment an order is placed. Leave empty to turn alerts off.</p></div>
           </div>
         </section>
         <section class="panel"><h2>Store policies</h2>
@@ -759,7 +761,7 @@
           bank: { bankName: $('#bank-name').value, accountName: $('#bank-holder').value, accountNumber: $('#bank-number').value },
           contact: { whatsapp: $('#c-wa').value, tiktok: $('#c-tt').value, snapchat: $('#c-sc').value },
           policies: { delivery: $('#p-delivery').value, returns: $('#p-returns').value },
-          email: { fromAddress: $('#e-from').value, fromName: $('#e-name').value, replyTo: $('#e-reply').value }
+          email: { fromAddress: $('#e-from').value, fromName: $('#e-name').value, replyTo: $('#e-reply').value, alertTo: $('#e-alert').value }
         } } });
         state.dirty = false;
         settingsView(view).then(() => say('Settings saved. The store updates right away.'));

@@ -300,7 +300,9 @@ async function saveSettings(body: any) {
   }
   const replyTo = text(input.email?.replyTo, 120).toLowerCase();
   if (replyTo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(replyTo)) throw new Refuse("The address replies go to looks incomplete.");
-  next.email = { fromAddress, fromName: text(input.email?.fromName, 60) || "Glossy Gems by Zee", replyTo };
+  const alertTo = text(input.email?.alertTo, 120).toLowerCase();
+  if (alertTo && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(alertTo)) throw new Refuse("The address for new order alerts looks incomplete.");
+  next.email = { fromAddress, fromName: text(input.email?.fromName, 60) || "Glossy Gems by Zee", replyTo, alertTo };
   await shop().setJSON("settings", next);
   return { settings: next, email: emailReady(next) };
 }
