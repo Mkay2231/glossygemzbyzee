@@ -7,6 +7,7 @@ import {
 import { sendStatusEmail, emailReady, EMAIL_STATUSES } from "../lib/mail.mts";
 import { notifyRestocks, sendToWaitlist, readWaitlist, changeWaitlist, dropWaitlist, waitingCounts, onSale } from "../lib/restock.mts";
 import { readDays, dayOf } from "../lib/stats.mts";
+import { startUpload, putPart, finishUpload, videoFor, dropVideo, VideoProblem } from "../lib/videos.mts";
 import { readOwner, signedIn, setup, login, changePassword, clearCookie } from "../lib/auth.mts";
 
 const UUID = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/;
@@ -58,7 +59,10 @@ async function saveProduct(body: any, origin: string) {
     if (!UUID.test(photo) || !(await photos().getMetadata(photo))) throw new Refuse("A photo is missing. Upload it again.");
   }
 
+  const video = await videoFor(input.video);
+
   let removed: string[] = [];
+  let oldVideo = "";
   let before: Product[] = [];
   const saved = await changeCatalog(products => {
     before = products;
@@ -82,20 +86,23 @@ async function saveProduct(body: any, origin: string) {
     const stock = existing && input.stock === input.stockWas ? existing.stock : input.stock;
     const product: Product = {
       id, name: name || existing!.name, type, price: input.price, stock,
-      description: text(input.description, 600), sizes, photos: shots, members, cashMin, cashMax,
+      description: text(input.description, 600), sizes, photos: shots, members, cashMin, cashMax, video,
       published, updatedAt: new Date().toISOString(),
     };
     removed = existing ? existing.photos.filter(photo => !shots.includes(photo)) : [];
+    oldVideo = existing?.video && existing.video.id !== video?.id ? existing.video.id : "";
     const next = existing ? products.map(item => item.id === id ? product : item) : [product, ...products];
     return { products: next, result: { product, products: next } };
   });
   await dropUnused(removed, saved.products);
+  await dropVideo(oldVideo);
   const restocked = await notifyRestocks(before, saved.products, origin);
   return { ...saved, restocked };
 }
 
 async function deleteProduct(id: string) {
   let removed: string[] = [];
+  let videoGone = "";
   /* A deleted piece is taken out of any combo it was in. A combo left with fewer than
      two pieces is no longer a combo, so it is hidden from the store until the owner fixes it. */
   let trimmed: string[] = [];
@@ -104,6 +111,7 @@ async function deleteProduct(id: string) {
     const target = list.find(product => product.id === id);
     if (!target) throw new Refuse("This product no longer exists.", 404);
     removed = target.photos;
+    videoGone = target.video?.id || "";
     trimmed = [];
     hidden = [];
     const next = list.filter(product => product.id !== id).map(product => {
@@ -116,6 +124,7 @@ async function deleteProduct(id: string) {
     return { products: next, result: next };
   });
   await dropUnused(removed, products);
+  await dropVideo(videoGone);
   await dropWaitlist(id);
   return { products, trimmed, hidden };
 }
@@ -363,7 +372,7 @@ export default async (req: Request, context: Context) => {
   const get = req.method === "GET";
   try {
     if (!get && !sameOrigin(req)) return fail("This request did not come from the dashboard.", 403);
-    const body = !get && route !== "photos" && req.method !== "DELETE" ? await req.json().catch(() => ({})) : {};
+    const body = !get && route !== "photos" && req.method !== "DELETE" && req.method !== "PUT" ? await req.json().catch(() => ({})) : {};
 
     if (route === "session" && get) {
       const [owner, current] = await Promise.all([readOwner(), signedIn(req)]);
@@ -407,6 +416,18 @@ export default async (req: Request, context: Context) => {
     }
     if (route.startsWith("products/") && req.method === "DELETE") return json(await deleteProduct(decodeURIComponent(route.slice(9))));
     if (route === "photos" && req.method === "POST") return json(await uploadPhoto(req), 201);
+    /* Videos arrive in pieces: start, send each piece, finish. */
+    if (route === "videos" && req.method === "POST") {
+      const inUse = new Set((await readCatalog()).products.map(product => product.video?.id).filter(Boolean) as string[]);
+      return json(await startUpload(text(body.type, 40), body.size, inUse), 201);
+    }
+    const piece = /^videos\/([a-f0-9-]{36})\/(\d{1,3})$/.exec(route);
+    if (piece && req.method === "PUT") {
+      await putPart(piece[1], Number(piece[2]), new Uint8Array(await req.arrayBuffer()));
+      return json({ ok: true });
+    }
+    const done = /^videos\/([a-f0-9-]{36})\/finish$/.exec(route);
+    if (done && req.method === "POST") return json({ video: await finishUpload(done[1]) });
     if (route === "orders" && get) return json({ orders: await listOrders() });
     if (route === "visitors" && get) {
       const span = Number(new URL(req.url).searchParams.get("days"));
@@ -427,7 +448,7 @@ export default async (req: Request, context: Context) => {
     if (route === "settings" && req.method === "POST") return json(await saveSettings(body));
     return fail("Not found.", 404);
   } catch (error) {
-    if (error instanceof Refuse) return fail(error.message, error.status);
+    if (error instanceof Refuse || error instanceof VideoProblem) return fail(error.message, error.status);
     console.error("admin", route, error);
     return fail("Something went wrong on our side. Try again.", 500);
   }

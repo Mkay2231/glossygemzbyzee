@@ -16,6 +16,7 @@ The online store and owner dashboard for Glossy Gems by Zee. Everything runs on 
 | `netlify/functions/restock.mts` | `/api/restock`: back-in-stock sign-ups for sold-out pieces. |
 | `netlify/functions/track.mts` | `/api/track`: a customer's view of their own order, by private link or by order number plus phone. |
 | `netlify/functions/hit.mts`, `netlify/lib/stats.mts` | `/api/hit`: cookieless visit counting for the dashboard's Visitors tab. |
+| `netlify/functions/video.mts`, `netlify/lib/videos.mts` | Product videos: stored in 3 MB pieces in the "videos" blob store, played back at `/media/video/:id` in byte ranges. |
 | `netlify/functions/sitemap.mts` | `/sitemap.xml`: every public page, product and post, built fresh from the catalogue. |
 | `netlify/edge-functions/previews.ts` | Writes each product's and post's own title, price, description and photo into `product.html` / `post.html` for link previews, plus Google product details. |
 | `netlify/lib/mail.mts` | The paid, shipped and delivered emails, sent through Resend. |
@@ -81,6 +82,7 @@ Set `ADMIN_SETUP_CODE` to a new value, deploy, and she uses "Reset it with a new
 
 - **Orders:** every order placed on the store, with the customer's details, a WhatsApp link, and buttons to mark it paid, shipped or delivered. Cancelling an order puts its pieces back on sale.
 - **Products:** add, edit, publish, unpublish and delete products. Photos are shrunk on her phone before uploading. Combos are built from existing pieces and have their own price and stock.
+- **Product videos:** one optional video per product, up to 60 seconds and 60 MB, MP4 or iPhone MOV in H.264. The dashboard refuses iPhone HEVC videos (many Android phones and computers can't play them) and suggests sending the clip to yourself on WhatsApp and uploading that copy, or setting the iPhone camera to "Most Compatible". The video appears after the photos on the product page, plays muted with sound available, and only downloads when tapped. Cards show a small "Video" tag. Replacing or removing a video, or deleting the product, deletes the old file; unsaved uploads are cleared after a day. Videos count towards Netlify's monthly bandwidth (100 GB on the free plan).
 - **Lip Gloss:** a shop category like the jewelry; shades go in the product's Options.
 - **Gift items:** flowers, money bouquets and other extras, added with "Add gift item". They appear only in the Gift Builder, never in the shop. For a money bouquet, switch on "Customer chooses how much cash goes in": the price becomes her fee, and the customer types the cash amount (within the smallest and largest she sets) and pays both.
 - **Blog:** write, publish and edit posts with an optional cover photo. Blank lines separate paragraphs, "## " starts a subheading and "- " a list item. The blog page and the home page's "From the blog" section appear once the first post is published.

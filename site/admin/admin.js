@@ -28,6 +28,7 @@
     plus: '<path d="M12 5v14M5 12h14"/>',
     image: '<path d="M4 5h16v14H4z"/><path d="m4 15.500 4.500-4.500 4 4 3-3 4.500 4.500"/><circle cx="15.500" cy="9" r="1.500"/>',
     visitors: '<path d="M4 19.500h16"/><path d="M7 16.500v-5M12 16.500V6M17 16.500v-8"/>',
+    video: '<path d="M4 6.500h11v11H4z"/><path d="m15 10.500 5-3v9l-5-3"/>',
     chat: '<path d="M4 5h16v11.500H10L5.500 20v-3.500H4V5Z"/><path d="M8 9.500h8M8 12.500h5"/>'
   };
   const icon = name => `<svg class="icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
@@ -406,6 +407,76 @@
     catch (error) { if (!state.products.length) view.innerHTML = `<div class="empty"><p class="empty__title">${esc(error.message)}</p></div>`; }
   }
 
+  /* ---------- product videos ---------- */
+  const MAX_VIDEO = 60 * 1024 * 1024;
+
+  /* Find the video format inside an MP4/MOV file: the "stsd" box in moov/trak/mdia/minf/stbl.
+     H.264 ("avc1") plays on every phone and computer; HEVC ("hvc1"), the iPhone default, does not. */
+  async function videoCodecs(file) {
+    const read = async (at, length) => new DataView(await file.slice(at, at + length).arrayBuffer());
+    const found = [];
+    const walk = async (start, end, depth) => {
+      let at = start;
+      while (at + 8 <= end && depth < 8) {
+        const head = await read(at, 16);
+        let size = head.getUint32(0);
+        const type = String.fromCharCode(head.getUint8(4), head.getUint8(5), head.getUint8(6), head.getUint8(7));
+        let body = 8;
+        if (size === 1) { size = Number(head.getBigUint64(8)); body = 16; }
+        else if (size === 0) size = end - at;
+        if (size < body) return;
+        if (['moov', 'trak', 'mdia', 'minf', 'stbl'].includes(type)) await walk(at + body, at + size, depth + 1);
+        else if (type === 'stsd') {
+          const entry = await read(at + body + 8, 8);
+          found.push(String.fromCharCode(entry.getUint8(4), entry.getUint8(5), entry.getUint8(6), entry.getUint8(7)));
+        }
+        at += size;
+      }
+    };
+    await walk(0, file.size, 0);
+    return found;
+  }
+
+  async function checkVideo(file) {
+    if (!/^video\/(mp4|quicktime)$/.test(file.type) && !/\.(mp4|mov)$/i.test(file.name)) throw new Error('Choose an MP4 or iPhone (MOV) video.');
+    if (file.size > MAX_VIDEO) throw new Error(`That video is ${(file.size / 1048576).toFixed(0)} MB. Videos can be up to 60 MB: trim it, or send it to yourself on WhatsApp and use that copy.`);
+    const head = new Uint8Array(await file.slice(4, 8).arrayBuffer());
+    if (String.fromCharCode(...head) !== 'ftyp') throw new Error('That file is not a video this store can use.');
+    const codecs = await videoCodecs(file).catch(() => []);
+    if (codecs.some(codec => /^(hvc1|hev1)$/.test(codec))) {
+      throw new Error('This video is in the iPhone HEVC format, which many Android phones and computers can\'t play. Send it to yourself on WhatsApp, save that copy and upload it, or set Camera → Formats to "Most Compatible".');
+    }
+    if (codecs.length && !codecs.some(codec => /^(avc1|avc3)$/.test(codec))) throw new Error('This video\'s format won\'t play on every phone. Send it to yourself on WhatsApp and upload that copy.');
+    const seconds = await new Promise(resolve => {
+      const probe = document.createElement('video');
+      const url = URL.createObjectURL(file);
+      const end = value => { clearTimeout(timer); URL.revokeObjectURL(url); resolve(value); };
+      /* Some browsers hold back video loading in a background tab; never let that stall the upload. */
+      const timer = setTimeout(() => end(NaN), 8000);
+      probe.preload = 'metadata';
+      probe.onloadedmetadata = () => end(probe.duration);
+      probe.onerror = () => end(NaN);
+      probe.src = url;
+    });
+    if (seconds > 61) throw new Error(`That video is ${Math.round(seconds)} seconds long. Keep it to 60 seconds or less.`);
+  }
+
+  /* Sent in 3 MB pieces, because one request to the site can only carry a few megabytes. */
+  async function uploadVideo(file, progress) {
+    const type = file.type || (/\.mov$/i.test(file.name) ? 'video/quicktime' : 'video/mp4');
+    const { id, chunk, parts } = await api('videos', { method: 'POST', body: { type, size: file.size } });
+    for (let n = 0; n < parts; n++) {
+      const piece = new Blob([file.slice(n * chunk, Math.min(file.size, (n + 1) * chunk))], { type: 'application/octet-stream' });
+      let tries = 0;
+      for (;;) {
+        try { await api(`videos/${id}/${n}`, { method: 'PUT', body: piece }); break; }
+        catch (error) { if (++tries >= 3) throw error; await new Promise(resolve => setTimeout(resolve, 1500 * tries)); }
+      }
+      progress((n + 1) / parts);
+    }
+    return (await api(`videos/${id}/finish`, { method: 'POST', body: {} })).video;
+  }
+
   /* Phone photos are large. Shrink to 1600px on the long side before uploading. */
   /* ---------- visitors ---------- */
   const PAGE_NAMES = {
@@ -677,8 +748,8 @@
       return;
     }
     const draft = existing
-      ? { ...existing, photos: [...existing.photos], members: [...existing.members], sizes: [...existing.sizes], customCash: existing.cashMin != null }
-      : { name: '', type: id === 'new-gift' ? GIFT_TYPE : 'Earrings', price: '', stock: 1, description: '', sizes: [], photos: [], members: [], published: false, customCash: false, cashMin: '', cashMax: '' };
+      ? { ...existing, photos: [...existing.photos], members: [...existing.members], sizes: [...existing.sizes], customCash: existing.cashMin != null, video: existing.video || null }
+      : { name: '', type: id === 'new-gift' ? GIFT_TYPE : 'Earrings', price: '', stock: 1, description: '', sizes: [], photos: [], members: [], published: false, customCash: false, cashMin: '', cashMax: '', video: null };
     let deleting = false;
     /* Customers waiting for this piece to come back in stock. */
     let waiting = [];
@@ -732,7 +803,19 @@
               ${index === 0 ? '<span class="photo__cover">Cover</span>' : ''}
               <div class="photo__tools">${index ? `<button class="textlink" type="button" data-cover="${index}">Make cover</button>` : '<span></span>'}<button class="textlink" type="button" data-drop="${index}">Remove</button></div>
             </div>`).join('')}</div>
-            <div class="actions"><label class="upload"><input type="file" accept="image/jpeg,image/png,image/webp" multiple ${draft.photos.length >= 12 ? 'disabled' : ''}><span class="btn btn--ghost btn--small">${icon('image')} Add photos</span></label><span data-upload-status role="status"></span></div>
+            <div class="actions"><label class="upload"><input type="file" data-photo-file accept="image/jpeg,image/png,image/webp" multiple ${draft.photos.length >= 12 ? 'disabled' : ''}><span class="btn btn--ghost btn--small">${icon('image')} Add photos</span></label><span data-upload-status role="status"></span></div>
+          </section>
+          <section class="panel"><h2>Video</h2>
+            ${draft.video ? `<div class="video-pick">
+                <video src="/media/video/${esc(draft.video.id)}" controls muted playsinline preload="metadata"></video>
+                <p class="field__hint">${(draft.video.size / 1048576).toFixed(1)} MB. It appears after the photos on the product page.</p>
+                <div class="actions"><button class="textlink" type="button" data-video-drop>Remove video</button></div>
+              </div>`
+            : `<p class="field__hint">Optional. A short clip of the piece being worn or catching the light: up to 60 seconds and 60 MB, MP4 or iPhone video.
+                If it's an iPhone video, send it to yourself on WhatsApp and save that copy first, so it plays on every phone (or set Camera → Formats to "Most Compatible").</p>
+              <div class="actions"><label class="upload"><input type="file" data-video-file accept="video/mp4,video/quicktime,.mp4,.mov"><span class="btn btn--ghost btn--small">${icon('video')} Add a video</span></label>
+              <span data-video-status role="status"></span></div>
+              <div class="progress" data-video-progress hidden><span></span></div>`}
           </section>
           <div class="savebar">
             <label class="switch"><input type="checkbox" id="published" ${draft.published ? 'checked' : ''}><span>Show in store</span></label>
@@ -799,7 +882,34 @@
           : 'Product deleted.');
         location.hash = '#/products';
       }));
-      $('input[type="file"]').addEventListener('change', async event => {
+      $('[data-video-drop]')?.addEventListener('click', () => { collect(); draft.video = null; state.dirty = true; draw(); say('Video removed. Save to keep the change.'); });
+      $('[data-video-file]')?.addEventListener('change', async event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        collect();
+        const status = $('[data-video-status]');
+        const bar = $('[data-video-progress]');
+        event.target.disabled = true;
+        try {
+          status.textContent = 'Checking the video…';
+          await checkVideo(file);
+          bar.hidden = false;
+          draft.video = await uploadVideo(file, share => {
+            status.textContent = `Uploading… ${Math.round(share * 100)}%`;
+            bar.firstElementChild.style.width = (share * 100).toFixed(1) + '%';
+          });
+          state.dirty = true;
+          draw();
+          say('Video added. Save to keep it.');
+        } catch (error) {
+          status.textContent = '';
+          bar.hidden = true;
+          event.target.disabled = false;
+          event.target.value = '';
+          say(error.message);
+        }
+      });
+      $('[data-photo-file]').addEventListener('change', async event => {
         const files = [...event.target.files].slice(0, 12 - draft.photos.length);
         const status = $('[data-upload-status]');
         collect();

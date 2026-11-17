@@ -26,7 +26,8 @@
     gift: '<path d="M4.500 11h15v9h-15zM3.500 7.500h17V11h-17zM12 7.500V20"/><path d="M12 7.500c-1.200-3.200-5-3.400-5-1.300 0 1.600 3 1.300 5 1.300Zm0 0c1.200-3.200 5-3.400 5-1.300 0 1.600-3 1.300-5 1.300Z"/>',
     tag: '<path d="M3.500 12.500V4h8.500l8.500 8.500-8 8-9-8Z"/><circle cx="8" cy="8.500" r="1.300"/>',
     check: '<path d="m5 12.500 4.500 4.500L19 7.500"/>',
-    copy: '<path d="M8.500 8.500h10v11h-10z"/><path d="M5.500 15.500v-11h10"/>'
+    copy: '<path d="M8.500 8.500h10v11h-10z"/><path d="M5.500 15.500v-11h10"/>',
+    play: '<path d="M8 5.500v13l10.500-6.500L8 5.500Z"/>'
   };
   const icon = name => `<svg class="icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name]}</svg>`;
 
@@ -156,7 +157,7 @@
         ? `<a class="add" href="${link(product)}" aria-label="Choose a size for ${name}">${icon('arrow')}</a>`
         : `<button class="add" type="button" data-add="${esc(product.id)}" aria-label="Add ${name} to bag">${icon('plus')}</button>`;
     return `<article class="card${feature ? ' card--feature' : ''}${soldOut ? ' is-soldout' : ''}">
-      <a class="card__media${isCluster(product) ? ' card__media--set' : ''}" href="${link(product)}" tabindex="-1" aria-hidden="true">${media(product, feature)}</a>
+      <a class="card__media${isCluster(product) ? ' card__media--set' : ''}" href="${link(product)}" tabindex="-1" aria-hidden="true">${media(product, feature)}${product.video ? `<span class="card__tag">${icon('play')} Video</span>` : ''}</a>
       <button class="save" type="button" data-save="${esc(product.id)}" aria-pressed="${saved.includes(String(product.id))}" aria-label="Save ${name}">${icon('heart')}</button>
       <div class="card__body">
         <h3 class="card__name"><a href="${link(product)}">${name}</a></h3>
@@ -740,18 +741,27 @@
       const rest = GG.catalog.filter(product => product.id !== item.id && !sets.includes(product) && !item.members?.includes(product.id));
       const others = availableFirst([...sets, ...rest.filter(product => !product.members), ...rest.filter(product => product.members)]).slice(0, 4);
       const soldOut = item.stock === 0;
-      const photos = item.photos.length > 1 ? item.photos : null;
+      /* Gallery slides: each photo (or the set's pieces when it has no photo of its own), then the video. */
+      const slides = [...(item.photos.length ? item.photos.map(photo => ({ photo })) : [{ set: true }]), ...(item.video ? [{ video: item.video }] : [])];
+      const gallery = slides.length > 1;
+      const poster = item.photos[0] ? photoUrl(item.photos[0]) : members[0] ? src(members[0]) : '';
       const state = saleState();
       const most = Math.max(1, stockOf(item) - inGifts(item.id) - inBag(item.id));
       qty = Math.min(qty, most);
-      shot = Math.min(shot, item.photos.length ? item.photos.length - 1 : 0);
+      shot = Math.min(shot, slides.length - 1);
+      const current = slides[shot];
 
+      const playing = $('.pdp__video', root);
       root.innerHTML = `
         <nav class="crumbs" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true">/</span><a href="/shop.html?type=${esc(item.type)}">${esc(item.type)}</a><span aria-hidden="true">/</span><span aria-current="page">${name}</span></nav>
         <div class="pdp">
           <div class="pdp__media${isCluster(item) ? ' pdp__media--set' : ''}">
-            ${photos ? `<img src="${esc(photoUrl(photos[shot]))}" alt="${name}" width="800" height="800">` : media(item, true)}
-            ${photos ? `<div class="thumbs">${photos.map((photo, index) => `<button type="button" data-shot="${index}" aria-pressed="${index === shot}" aria-label="Photo ${index + 1} of ${name}"><img src="${esc(photoUrl(photo))}" alt="" width="80" height="80"></button>`).join('')}</div>` : ''}
+            ${current.video
+              ? `<video class="pdp__video" src="/media/video/${esc(current.video.id)}" data-video="${esc(current.video.id)}"${poster ? ` poster="${esc(poster)}"` : ''} controls muted playsinline preload="none" aria-label="Video of ${name}"></video>`
+              : gallery && current.photo ? `<img src="${esc(photoUrl(current.photo))}" alt="${name}" width="800" height="800">` : media(item, true)}
+            ${gallery ? `<div class="thumbs">${slides.map((slide, index) => `<button type="button" data-shot="${index}" aria-pressed="${index === shot}" aria-label="${slide.video ? 'Video' : 'Photo ' + (index + 1)} of ${name}">${
+                slide.video ? `${poster ? `<img src="${esc(poster)}" alt="" width="80" height="80">` : ''}<span class="thumbs__play">${icon('play')}</span>`
+                : `<img src="${esc(slide.photo ? photoUrl(slide.photo) : poster)}" alt="" width="80" height="80">`}</button>`).join('')}</div>` : ''}
           </div>
           <div class="pdp__info">
             <h1>${name}</h1>
@@ -809,6 +819,17 @@
             <h2 id="look-title">Complete the look</h2>
             <div class="grid grid--four">${others.map(other => card(other)).join('')}</div>
           </section>` : ''}`;
+      const video = $('.pdp__video', root);
+      if (video && playing && playing.dataset.video === video.dataset.video) video.replaceWith(playing);
+      else if (video) {
+        /* A phone that can't play this format gets a plain note instead of a broken player. */
+        video.addEventListener('error', () => {
+          const note = document.createElement('p');
+          note.className = 'pdp__video-error';
+          note.textContent = "This video can't play on this device. The photos show the piece.";
+          video.replaceWith(note);
+        });
+      }
     }
 
     draw();
@@ -847,7 +868,12 @@
         draw();
         ($(`[data-step="${step.dataset.step}"]:not(:disabled)`) || $('[data-buy]')).focus();
       }
-      if (thumb) { shot = Number(thumb.dataset.shot); draw(); $(`[data-shot="${shot}"]`).focus(); }
+      if (thumb) {
+        shot = Number(thumb.dataset.shot);
+        draw();
+        $(`[data-shot="${shot}"]`).focus();
+        $('.pdp__video', root)?.play().catch(() => {});
+      }
       if (event.target.closest('[data-buy]')) {
         if (item.sizes.length && !size) {
           const error = $('[data-buy-error]');

@@ -16,6 +16,8 @@ export type Product = {
   description: string; sizes: string[]; photos: string[]; members: string[];
   /* Gift items only: when set, the customer chooses how much cash goes in (money bouquets) and price is the fee. */
   cashMin?: number | null; cashMax?: number | null;
+  /* One optional short video, stored in pieces (see lib/videos.mts). */
+  video?: { id: string; type: string; size: number } | null;
   published: boolean; sample?: boolean; updatedAt: string;
 };
 
